@@ -243,6 +243,8 @@ Expr lisp_make_file_output_stream(StreamState * stream, FILE * file, bool close_
 
 Expr lisp_make_buffer_output_stream(StreamState * stream, size_t size, char * buffer);
 
+Expr make_string_input_stream(char const * str);
+
 void stream_put_string(Expr exp, char const * str);
 
 void stream_release(Expr exp);

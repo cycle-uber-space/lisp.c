@@ -38,6 +38,19 @@ static Expr _make_file_stream(StreamState * stream, FILE * file, bool close_on_q
     return make_expr(TYPE_STREAM, index);
 }
 
+static Expr _make_buffer_stream(StreamState * stream, size_t size, char * buffer)
+{
+    LISP_ASSERT(stream->num < LISP_MAX_STREAMS);
+    U64 const index = stream->num++;
+    StreamInfo * info = stream->info + index;
+    memset(info, 0, sizeof(StreamInfo));
+    info->size = size;
+    info->buffer = buffer;
+    info->cursor = 0;
+
+    return make_expr(TYPE_STREAM, index);
+}
+
 static void lisp_stream_show_info(StreamState * stream)
 {
     for (U64 i = 0; i < stream->num; i++)
@@ -59,17 +72,16 @@ Expr lisp_make_file_output_stream(StreamState * stream, FILE * file, bool close_
     return _make_file_stream(stream, file, close_on_quit);
 }
 
+Expr lisp_make_string_input_stream(StreamState * stream, char const * str)
+{
+    // TODO copy string into buffer?
+    size_t const len = strlen(str);
+    return _make_buffer_stream(stream, len + 1, str);
+}
+
 Expr lisp_make_buffer_output_stream(StreamState * stream, size_t size, char * buffer)
 {
-    LISP_ASSERT(stream->num < LISP_MAX_STREAMS);
-    U64 const index = stream->num++;
-    StreamInfo * info = stream->info + index;
-    memset(info, 0, sizeof(StreamInfo));
-    info->size = size;
-    info->buffer = buffer;
-    info->cursor = 0;
-
-    return make_expr(TYPE_STREAM, index);
+    return _make_buffer_stream(stream, size, buffer);
 }
 
 void lisp_stream_put_string(StreamState * stream, Expr exp, char const * str)
@@ -103,6 +115,11 @@ void lisp_stream_release(StreamState * stream, Expr exp)
         fclose(info->file);
     }
     memcpy(info, stream->info + --stream->num, sizeof(StreamInfo));
+}
+
+Expr make_string_input_stream(char const * str)
+{
+    return lisp_make_string_input_stream(&global.stream, str);
 }
 
 void stream_put_string(Expr exp, char const * str)
