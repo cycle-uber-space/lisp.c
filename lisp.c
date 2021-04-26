@@ -12,6 +12,10 @@
 #define LISP_MAX_SYMBOLS -1
 #define LISP_DEF_SYMBOLS 16
 
+#ifndef LISP_SYMBOL_NAME_OF_NIL
+#define LISP_SYMBOL_NAME_OF_NIL 1
+#endif
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -365,6 +369,12 @@ Expr make_symbol(char const * name)
 
 char const * symbol_name(Expr exp)
 {
+#if LISP_SYMBOL_NAME_OF_NIL
+    if (exp == nil)
+    {
+        return "nil";
+    }
+#endif
     return lisp_symbol_name(&global.symbol, exp);
 }
 
@@ -457,6 +467,9 @@ static void unit_test_symbol(TestState * test)
     LISP_TEST_GROUP(test, "symbol");
     LISP_TEST_ASSERT(test, !strcmp("foo", symbol_name(intern("foo"))));
     LISP_TEST_ASSERT(test, !strcmp("bar", symbol_name(intern("bar"))));
+#if LISP_SYMBOL_NAME_OF_NIL
+    LISP_TEST_ASSERT(test, !strcmp("nil", symbol_name(intern("nil"))));
+#endif
 }
 
 static void unit_test_util(TestState * test)
