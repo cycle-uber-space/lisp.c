@@ -288,6 +288,7 @@ inline static bool eq(Expr a, Expr b)
 bool equal(Expr a, Expr b);
 
 char const * repr(Expr exp);
+void println(Expr exp);
 
 Expr intern(char const * name);
 
