@@ -133,6 +133,14 @@ static Expr parse_expr(Expr in)
     {
         return parse_list(in);
     }
+#if LISP_READER_PARSE_QUOTE
+    else if (stream_peek_char(in) == '\'')
+    {
+        stream_skip_char(in);
+        Expr const exp = list_2(intern("quote"), parse_expr(in));
+        return exp;
+    }
+#endif
     else if (is_symbol_start(stream_peek_char(in)))
     {
         char lexeme[4096];

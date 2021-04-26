@@ -14,6 +14,10 @@
 #define LISP_SYMBOL_NAME_OF_NIL 1
 #endif
 
+#ifndef LISP_READER_PARSE_QUOTE
+#define LISP_READER_PARSE_QUOTE 1
+#endif
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
