@@ -117,6 +117,7 @@ enum
 {
     TYPE_NIL = 0,
     TYPE_SYMBOL,
+    TYPE_CONS,
 };
 
 enum
@@ -161,6 +162,36 @@ Expr make_symbol(char const * name);
 char const * symbol_name(Expr exp);
 #endif
 
+/* cons.h */
+
+#define LISP_MAX_CONSES -1
+#define LISP_DEF_CONSES  4
+
+struct Pair
+{
+    Expr a, b;
+};
+
+typedef struct
+{
+    U64 num;
+    U64 max;
+    struct Pair * pairs;
+} ConsState;
+
+void cons_init(ConsState * cons);
+void cons_quit(ConsState * cons);
+
+bool is_cons(Expr exp);
+
+Expr lisp_cons(ConsState * cons, Expr a, Expr b);
+Expr lisp_car(ConsState * cons, Expr exp);
+Expr lisp_cdr(ConsState * cons, Expr exp);
+
+Expr cons(Expr a, Expr b);
+Expr car(Expr exp);
+Expr cdr(Expr exp);
+
 /* util.h */
 
 Expr intern(char const * name);
@@ -174,6 +205,7 @@ Expr eval(Expr exp, Expr env);
 typedef struct
 {
     SymbolState symbol;
+    ConsState cons;
 } SystemState;
 
 void system_init(SystemState * system);
@@ -384,6 +416,106 @@ char const * symbol_name(Expr exp)
 
 #endif
 
+/* cons.c */
+
+static void _cons_realloc(ConsState * cons)
+{
+    cons->pairs = (struct Pair *) LISP_REALLOC(cons->pairs, sizeof(struct Pair) * cons->max);
+    if (!cons->pairs)
+    {
+        LISP_FAIL("cons memory allocation failed\n");
+    }
+}
+
+static void _cons_maybe_realloc(ConsState * cons)
+{
+    if (cons->num < cons->max)
+    {
+        return;
+    }
+
+    if (LISP_MAX_CONSES == -1 || cons->max * 2 <= (U64) LISP_MAX_CONSES)
+    {
+        if (cons->max == 0)
+        {
+            cons->max = LISP_DEF_CONSES;
+        }
+        else
+        {
+            cons->max *= 2;
+        }
+
+        _cons_realloc(cons);
+        return;
+    }
+
+    LISP_FAIL("cons ran over memory budget\n");
+}
+
+static struct Pair * _cons_lookup(ConsState * cons, U64 index)
+{
+    LISP_ASSERT_DEBUG(index < cons->num);
+    return &cons->pairs[index];
+}
+
+void cons_init(ConsState * cons)
+{
+    memset(cons, 0, sizeof(ConsState));
+}
+
+void cons_quit(ConsState * cons)
+{
+}
+
+bool is_cons(Expr exp)
+{
+    return expr_type(exp) == TYPE_CONS;
+}
+
+Expr lisp_cons(ConsState * cons, Expr a, Expr b)
+{
+    _cons_maybe_realloc(cons);
+
+    U64 const index = cons->num++;
+    struct Pair * pair = _cons_lookup(cons, index);
+    pair->a = a;
+    pair->b = b;
+    return make_expr(TYPE_CONS, index);
+}
+
+Expr lisp_car(ConsState * cons, Expr exp)
+{
+    LISP_ASSERT(is_cons(exp));
+
+    U64 const index = expr_data(exp);
+    struct Pair * pair = _cons_lookup(cons, index);
+    return pair->a;
+}
+
+Expr lisp_cdr(ConsState * cons, Expr exp)
+{
+    LISP_ASSERT(is_cons(exp));
+
+    U64 const index = expr_data(exp);
+    struct Pair * pair = _cons_lookup(cons, index);
+    return pair->b;
+}
+
+Expr cons(Expr a, Expr b)
+{
+    return lisp_cons(&global.cons, a, b);
+}
+
+Expr car(Expr exp)
+{
+    return lisp_car(&global.cons, exp);
+}
+
+Expr cdr(Expr exp)
+{
+    return lisp_cdr(&global.cons, exp);
+}
+
 /* util.c */
 
 Expr intern(char const * name)
@@ -410,10 +542,12 @@ Expr eval(Expr exp, Expr env)
 void system_init(SystemState * system)
 {
     symbol_init(&system->symbol);
+    cons_init(&system->cons);
 }
 
 void system_quit(SystemState * system)
 {
+    cons_quit(&system->cons);
     symbol_quit(&system->symbol);
 }
 
@@ -476,6 +610,14 @@ static void unit_test_symbol(TestState * test)
 #endif
 }
 
+static void unit_test_cons(TestState * test)
+{
+    LISP_TEST_GROUP(test, "cons");
+    LISP_TEST_ASSERT(test, is_cons(cons(nil, nil)));
+    LISP_TEST_ASSERT(test, car(cons(nil, nil)) == nil);
+    LISP_TEST_ASSERT(test, cdr(cons(nil, nil)) == nil);
+}
+
 static void unit_test_util(TestState * test)
 {
     LISP_TEST_GROUP(test, "util");
@@ -496,6 +638,7 @@ static void unit_test(TestState * test)
     unit_test_expr(test);
     unit_test_nil(test);
     unit_test_symbol(test);
+    unit_test_cons(test);
     unit_test_util(test);
     unit_test_eval(test);
     LISP_TEST_GROUP(test, "summary");
