@@ -7,7 +7,7 @@ CC = cc
 CFLAGS = -std=c11 -Wall -Wextra -Wno-unused-parameter -O2
 LDFLAGS = -Wall -Wextra -O2
 
-OBJ = main.o global.o
+OBJ = system.o global.o main.o
 
 all: lisp
 
