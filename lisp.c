@@ -44,6 +44,18 @@ static_assert(sizeof(I64) == 8, "");
 static_assert(sizeof(F32) == 4, "");
 static_assert(sizeof(F64) == 8, "");
 
+#ifndef LISP_MALLOC
+#define LISP_MALLOC(size) malloc(size)
+#endif
+
+#ifndef LISP_REALLOC
+#define LISP_REALLOC(ptr, size) realloc(ptr, size)
+#endif
+
+#ifndef LISP_FREE
+#define LISP_FREE(ptr) free(ptr)
+#endif
+
 /* test.h */
 
 typedef struct
