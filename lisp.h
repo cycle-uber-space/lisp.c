@@ -199,6 +199,16 @@ Expr cdr(Expr exp);
 void rplaca(Expr exp, Expr val);
 void rplacd(Expr exp, Expr val);
 
+inline static Expr caar(Expr exp)
+{
+    return car(car(exp));
+}
+
+inline static Expr cdar(Expr exp)
+{
+    return cdr(car(exp));
+}
+
 /* stream.h */
 
 #define LISP_MAX_STREAMS 64
