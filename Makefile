@@ -7,13 +7,15 @@ CC = cc
 CFLAGS = -std=c11 -Wall -Wextra -Wno-unused-parameter -O2
 LDFLAGS = -Wall -Wextra -O2
 
+OBJ = main.o
+
 all: lisp
 
 clean:
-	rm -f lisp.o
+	rm -f $(OBJ)
 	rm -f lisp
 
-lisp: lisp.o
+lisp: $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $<
 
 %.o: %.c lisp.h
