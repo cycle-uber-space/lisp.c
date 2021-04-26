@@ -209,6 +209,18 @@ Expr list_2(Expr exp1, Expr exp2);
 Expr first(Expr seq);
 Expr second(Expr seq);
 
+/* env.h */
+
+Expr make_env(Expr outer);
+
+void env_def(Expr env, Expr var, Expr val);
+void env_del(Expr env, Expr var);
+
+bool env_can_set(Expr env, Expr var);
+
+Expr env_get(Expr env, Expr var);
+void env_set(Expr env, Expr var, Expr val);
+
 /* core.h */
 
 Expr make_core_env();
@@ -610,6 +622,160 @@ Expr second(Expr seq)
     return car(cdr(seq));
 }
 
+/* env.c */
+
+static Expr env_vars(Expr env);
+static void env_set_vars(Expr env, Expr vars);
+static Expr env_vals(Expr env);
+static void env_set_vals(Expr env, Expr vals);
+static Expr env_outer(Expr env);
+
+static Expr _env_find_local(Expr env, Expr var)
+{
+    Expr vars = env_vars(env);
+    Expr vals = env_vals(env);
+    while (vars)
+    {
+        if (car(vars) == var)
+        {
+            return vals;
+        }
+        vars = cdr(vars);
+        vals = cdr(vals);
+    }
+    return nil;
+}
+
+static Expr _env_find_global(Expr env, Expr var)
+{
+    while (env)
+    {
+        Expr const vals = _env_find_local(env, var);
+        if (vals)
+        {
+            return vals;
+        }
+        else
+        {
+            env = env_outer(env);
+        }
+    }
+    return nil;
+}
+
+Expr make_env(Expr outer)
+{
+    // ((<vars> . <vals>) . <outer>)
+    // TODO add dummy conses as sentinels for vars and vals
+    return cons(cons(nil, nil), outer);
+}
+
+static Expr env_vars(Expr env)
+{
+    return caar(env);
+}
+
+static void env_set_vars(Expr env, Expr vars)
+{
+    rplaca(car(env), vars);
+}
+
+static Expr env_vals(Expr env)
+{
+    return cdar(env);
+}
+
+static void env_set_vals(Expr env, Expr vals)
+{
+    rplacd(car(env), vals);
+}
+
+static Expr env_outer(Expr env)
+{
+    return cdr(env);
+}
+
+void env_def(Expr env, Expr var, Expr val)
+{
+    Expr const vals = _env_find_local(env, var);
+    if (vals)
+    {
+        rplaca(vals, val);
+    }
+    else
+    {
+        env_set_vars(env, cons(var, env_vars(env)));
+        env_set_vals(env, cons(val, env_vals(env)));
+    }
+}
+
+void env_del(Expr env, Expr var)
+{
+    Expr prev_vars = nil;
+    Expr prev_vals = nil;
+
+    Expr vars = env_vars(env);
+    Expr vals = env_vals(env);
+    while (vars)
+    {
+        if (car(vars) == var)
+        {
+            if (prev_vars)
+            {
+                LISP_ASSERT(prev_vals);
+                rplacd(prev_vars, cdr(vars));
+                rplacd(prev_vals, cdr(vals));
+            }
+            else
+            {
+                env_set_vars(env, cdr(vars));
+                env_set_vals(env, cdr(vals));
+            }
+            return;
+        }
+
+        prev_vars = vars;
+        prev_vals = vals;
+        vars = cdr(vars);
+        vals = cdr(vals);
+    }
+
+    LISP_FAIL("unbound variable %s\n", repr(var));
+}
+
+bool env_can_set(Expr env, Expr var)
+{
+    Expr const tmp = _env_find_global(env, var);
+    return tmp != nil;
+}
+
+Expr env_get(Expr env, Expr var)
+{
+    Expr const vals = _env_find_global(env, var);
+    if (vals)
+    {
+        return car(vals);
+    }
+    else
+    {
+        LISP_FAIL("unbound variable %s\n", repr(var));
+        return nil;
+    }
+}
+
+void env_set(Expr env, Expr var, Expr val)
+{
+    Expr const vals = _env_find_global(env, var);
+    if (vals)
+    {
+        rplaca(vals, val);
+    }
+    else
+    {
+        LISP_FAIL("unbound variable %s\n", repr(var));
+    }
+}
+
 /* core.c */
 
 Expr make_core_env()
@@ -724,6 +890,51 @@ static void unit_test_util(TestState * test)
     }
 }
 
+static void unit_test_env(TestState * test)
+{
+    LISP_TEST_GROUP(test, "env");
+    {
+        Expr env = make_env(nil);
+        Expr const foo = intern("foo");
+        Expr const bar = intern("bar");
+        LISP_TEST_ASSERT(test, !env_can_set(env, foo));
+        LISP_TEST_ASSERT(test, !env_can_set(env, bar));
+        env_def(env, foo, bar);
+        LISP_TEST_ASSERT(test,  env_can_set(env, foo));
+        LISP_TEST_ASSERT(test, !env_can_set(env, bar));
+        LISP_TEST_ASSERT(test, env_get(env, foo) == bar);
+
+        env_def(env, bar, foo);
+        LISP_TEST_ASSERT(test,  env_can_set(env, foo));
+        LISP_TEST_ASSERT(test,  env_can_set(env, bar));
+        LISP_TEST_ASSERT(test, env_get(env, foo) == bar);
+        LISP_TEST_ASSERT(test, env_get(env, bar) == foo);
+
+        env_del(env, foo);
+        LISP_TEST_ASSERT(test, !env_can_set(env, foo));
+        LISP_TEST_ASSERT(test,  env_can_set(env, bar));
+        LISP_TEST_ASSERT(test, env_get(env, bar) == foo);
+    }
+    {
+        Expr env1 = make_env(nil);
+        Expr env2 = make_env(env1);
+        Expr const foo = intern("foo");
+        Expr const bar = intern("bar");
+
+        LISP_TEST_ASSERT(test, !env_can_set(env1, foo));
+        LISP_TEST_ASSERT(test, !env_can_set(env2, foo));
+
+        LISP_TEST_ASSERT(test, !env_can_set(env1, bar));
+        LISP_TEST_ASSERT(test, !env_can_set(env2, bar));
+
+        env_def(env1, foo, foo);
+
+        LISP_TEST_ASSERT(test,  env_can_set(env1, foo));
+        LISP_TEST_ASSERT(test,  env_can_set(env2, foo));
+        LISP_TEST_ASSERT(test, !env_can_set(env2, bar));
+    }
+}
+
 static void unit_test_eval(TestState * test)
 {
     LISP_TEST_GROUP(test, "eval");
@@ -742,6 +953,7 @@ static void unit_test(TestState * test)
     unit_test_symbol(test);
     unit_test_cons(test);
     unit_test_util(test);
+    unit_test_env(test);
     unit_test_eval(test);
     LISP_TEST_GROUP(test, "summary");
     LISP_TEST_FINISH(test);
