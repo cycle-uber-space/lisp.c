@@ -187,10 +187,15 @@ bool is_cons(Expr exp);
 Expr lisp_cons(ConsState * cons, Expr a, Expr b);
 Expr lisp_car(ConsState * cons, Expr exp);
 Expr lisp_cdr(ConsState * cons, Expr exp);
+void lisp_rplaca(ConsState * cons, Expr exp, Expr val);
+void lisp_rplacd(ConsState * cons, Expr exp, Expr val);
 
 Expr cons(Expr a, Expr b);
 Expr car(Expr exp);
 Expr cdr(Expr exp);
+
+void rplaca(Expr exp, Expr val);
+void rplacd(Expr exp, Expr val);
 
 /* util.h */
 
@@ -511,6 +516,24 @@ Expr lisp_cdr(ConsState * cons, Expr exp)
     return pair->b;
 }
 
+void lisp_rplaca(ConsState * cons, Expr exp, Expr val)
+{
+    LISP_ASSERT(is_cons(exp));
+
+    U64 const index = expr_data(exp);
+    struct Pair * pair = _cons_lookup(cons, index);
+    pair->a = val;
+}
+
+void lisp_rplacd(ConsState * cons, Expr exp, Expr val)
+{
+    LISP_ASSERT(is_cons(exp));
+
+    U64 const index = expr_data(exp);
+    struct Pair * pair = _cons_lookup(cons, index);
+    pair->b = val;
+}
+
 Expr cons(Expr a, Expr b)
 {
     return lisp_cons(&global.cons, a, b);
@@ -524,6 +547,16 @@ Expr car(Expr exp)
 Expr cdr(Expr exp)
 {
     return lisp_cdr(&global.cons, exp);
+}
+
+void rplaca(Expr exp, Expr val)
+{
+    lisp_rplaca(&global.cons, exp, val);
+}
+
+void rplacd(Expr exp, Expr val)
+{
+    lisp_rplacd(&global.cons, exp, val);
 }
 
 /* util.c */
