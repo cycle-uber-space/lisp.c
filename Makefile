@@ -16,7 +16,7 @@ clean:
 	rm -f lisp
 
 lisp: $(OBJ)
-	$(CC) $(LDFLAGS) -o $@ $<
+	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c lisp.h
 	$(CC) -c $(CFLAGS) -o $@ $<
