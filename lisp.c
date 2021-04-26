@@ -5,6 +5,9 @@
 #define LISP_DEBUG 1
 #endif
 
+#define LISP_MAX_SYMBOLS -1
+#define LISP_DEF_SYMBOLS 16
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -107,6 +110,7 @@ U64 expr_data(Expr exp);
 enum
 {
     TYPE_NIL = 0,
+    TYPE_SYMBOL,
 };
 
 enum
@@ -127,10 +131,22 @@ inline static bool is_nil(Expr exp)
 
 typedef struct
 {
+    U64 num;
+    U64 max;
+    char ** names;
 } SymbolState;
 
 void symbol_init(SymbolState * symbol);
 void symbol_quit(SymbolState * symbol);
+
+inline static bool is_symbol(Expr exp)
+{
+    return expr_type(exp) == TYPE_SYMBOL;
+}
+
+Expr lisp_make_symbol(SymbolState * symbol, char const * name);
+
+Expr make_symbol(char const * name);
 
 /* util.h */
 
@@ -251,19 +267,93 @@ U64 expr_data(Expr exp)
 
 /* symbol.c */
 
+static void _symbol_maybe_realloc(SymbolState * symbol)
+{
+    if (symbol->num < symbol->max)
+    {
+        return;
+    }
+
+    if (LISP_MAX_SYMBOLS == -1 || symbol->max * 2 <= LISP_MAX_SYMBOLS)
+    {
+        if (symbol->max == 0)
+        {
+            symbol->max = LISP_DEF_SYMBOLS;
+        }
+        else
+        {
+            symbol->max *= 2;
+        }
+
+        symbol->names = (char **) LISP_REALLOC(symbol->names, sizeof(char *) * symbol->max);
+        if (!symbol->names)
+        {
+            LISP_FAIL("symbol memory allocation failed\n");
+        }
+        return;
+    }
+
+    LISP_FAIL("intern ran over memory budget\n");
+}
+
 void symbol_init(SymbolState * symbol)
 {
+    LISP_ASSERT_DEBUG(symbol);
+
+    memset(symbol, 0, sizeof(SymbolState));
+    _symbol_maybe_realloc(symbol);
 }
 
 void symbol_quit(SymbolState * symbol)
 {
+    LISP_FREE(symbol->names);
+    memset(symbol, 0, sizeof(SymbolState));
+}
+
+Expr lisp_make_symbol(SymbolState * symbol, char const * name)
+{
+    LISP_ASSERT(name);
+    size_t const len = strlen(name);
+
+    for (U64 index = 0; index < symbol->num; ++index)
+    {
+        char const * str = symbol->names[index];
+        size_t const tmp = strlen(str); // TODO cache this?
+        if (len == tmp && !strncmp(name, str, len))
+        {
+            return make_expr(TYPE_SYMBOL, index);
+        }
+    }
+
+    _symbol_maybe_realloc(symbol);
+
+    U64 const index = symbol->num;
+    char * buffer = (char *) LISP_MALLOC(len + 1);
+    memcpy(buffer, name, len);
+    buffer[len] = 0;
+    symbol->names[index] = buffer;
+    ++symbol->num;
+
+    return make_expr(TYPE_SYMBOL, index);
+}
+
+Expr make_symbol(char const * name)
+{
+    return lisp_make_symbol(&global.symbol, name);
 }
 
 /* util.c */
 
 Expr intern(char const * name)
 {
-    return nil;
+    if (!strcmp("nil", name))
+    {
+        return nil;
+    }
+    else
+    {
+        return make_symbol(name);
+    }
 }
 
 /* eval.c */
@@ -338,6 +428,8 @@ static void unit_test_util(TestState * test)
 {
     LISP_TEST_GROUP(test, "util");
     LISP_TEST_ASSERT(test, intern("nil") == nil);
+    LISP_TEST_ASSERT(test, is_nil(intern("nil")));
+    LISP_TEST_ASSERT(test, is_symbol(intern("nul")));
 }
 
 static void unit_test_eval(TestState * test)
