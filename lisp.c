@@ -236,6 +236,10 @@ void stream_put_string(Expr exp, char const * str);
 
 void stream_release(Expr exp);
 
+/* printer.h */
+
+void render_expr(Expr exp, Expr out);
+
 /* util.h */
 
 char const * repr(Expr exp);
@@ -739,11 +743,37 @@ void stream_release(Expr exp)
     lisp_stream_release(&global.stream, exp);
 }
 
+/* printer.c */
+
+void render_expr(Expr exp, Expr out);
+
+void render_expr(Expr exp, Expr out)
+{
+    switch (expr_type(exp))
+    {
+    case TYPE_NIL:
+        LISP_ASSERT_DEBUG(expr_data(exp) == 0);
+        stream_put_string(out, "nil");
+        break;
+    case TYPE_SYMBOL:
+        stream_put_string(out, symbol_name(exp));
+        break;
+    default:
+        LISP_FAIL("cannot print expression %016" PRIx64 "\n", exp);
+        break;
+    }
+}
+
 /* util.c */
 
 char const * repr(Expr exp)
 {
-    return "<expression>";
+    // TODO multiple calls => need temp buffer per call
+    static char buffer[4096] = { 0 };
+    Expr out = lisp_make_buffer_output_stream(&global.stream, 4096, buffer);
+    render_expr(exp, out);
+    stream_release(out);
+    return buffer;
 }
 
 Expr intern(char const * name)
@@ -1059,6 +1089,12 @@ static void unit_test_stream(TestState * test)
     LISP_TEST_ASSERT(test, is_stream(global.stream.stderr));
 }
 
+static void unit_test_printer(TestState * test)
+{
+    LISP_TEST_GROUP(test, "printer");
+    LISP_TEST_ASSERT(test, !strcmp("nil", repr(nil)));
+}
+
 static void unit_test_util(TestState * test)
 {
     LISP_TEST_GROUP(test, "util");
@@ -1142,6 +1178,7 @@ static void unit_test(TestState * test)
     unit_test_symbol(test);
     unit_test_cons(test);
     unit_test_stream(test);
+    unit_test_printer(test);
     unit_test_util(test);
     unit_test_env(test);
     unit_test_eval(test);
