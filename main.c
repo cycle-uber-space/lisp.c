@@ -154,7 +154,6 @@ static void unit_test_eval(TestState * test)
 
 static void unit_test(TestState * test)
 {
-    LISP_TEST_BEGIN(test);
     unit_test_expr(test);
     unit_test_nil(test);
     unit_test_symbol(test);
@@ -165,8 +164,6 @@ static void unit_test(TestState * test)
     unit_test_util(test);
     unit_test_env(test);
     unit_test_eval(test);
-    LISP_TEST_GROUP(test, "summary");
-    LISP_TEST_FINISH(test);
 }
 
 int main(int argc, char ** argv)
@@ -179,8 +176,24 @@ int main(int argc, char ** argv)
     if (!strcmp("unit", cmd))
     {
         global_init();
-        TestState test;
-        unit_test(&test);
+        TestState _test;
+        TestState * test = &_test;
+        LISP_TEST_BEGIN(test);
+        for (int i = 2; i < argc; i++)
+        {
+            if (!strcmp("--exit-on-fail", argv[i]))
+            {
+                test->exit_on_fail = true;
+            }
+            else if (!strcmp("--no-exit-on-fail", argv[i]))
+            {
+                test->exit_on_fail = false;
+            }
+        }
+
+        unit_test(test);
+        LISP_TEST_GROUP(test, "summary");
+        LISP_TEST_FINISH(test);
         global_quit();
     }
     else
