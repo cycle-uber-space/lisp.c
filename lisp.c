@@ -199,6 +199,8 @@ void rplacd(Expr exp, Expr val);
 
 /* util.h */
 
+char const * repr(Expr exp);
+
 Expr intern(char const * name);
 
 Expr list_1(Expr exp1);
@@ -559,7 +561,22 @@ void rplacd(Expr exp, Expr val)
     lisp_rplacd(&global.cons, exp, val);
 }
 
+Expr caar(Expr exp)
+{
+    return car(car(exp));
+}
+
+Expr cdar(Expr exp)
+{
+    return cdr(car(exp));
+}
+
 /* util.c */
+
+char const * repr(Expr exp)
+{
+    return "<expression>";
+}
 
 Expr intern(char const * name)
 {
