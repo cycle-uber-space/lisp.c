@@ -16,5 +16,5 @@ clean:
 lisp: lisp.o
 	$(CC) $(LDFLAGS) -o $@ $<
 
-%.o: %.c
+%.o: %.c lisp.h
 	$(CC) -c $(CFLAGS) -o $@ $<
