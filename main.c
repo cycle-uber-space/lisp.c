@@ -144,6 +144,11 @@ static Expr make_quote(Expr exp)
     return list_2(intern("quote"), exp);
 }
 
+static char const * eval_src(char const * src, Expr env)
+{
+    return repr(eval(read_one_from_string(src), env));
+}
+
 static void unit_test_eval(TestState * test)
 {
     LISP_TEST_GROUP(test, "eval");
@@ -158,6 +163,13 @@ static void unit_test_eval(TestState * test)
 
         Expr foo = intern("foo");
         LISP_TEST_ASSERT(test, eval(make_quote(foo), env) == foo);
+    }
+
+    {
+        Expr env = make_core_env();
+        LISP_TEST_ASSERT(test, !strcmp("nil", eval_src("nil", env)));
+        LISP_TEST_ASSERT(test, !strcmp("t", eval_src("t", env)));
+        LISP_TEST_ASSERT(test, !strcmp("foo", eval_src("(quote foo)", env)));
     }
 }
 
