@@ -319,6 +319,10 @@ void symbol_init(SymbolState * symbol)
 
 void symbol_quit(SymbolState * symbol)
 {
+    for (U64 i = 0; i < symbol->num; i++)
+    {
+        LISP_FREE(symbol->names[i]);
+    }
     LISP_FREE(symbol->names);
     memset(symbol, 0, sizeof(SymbolState));
 }
