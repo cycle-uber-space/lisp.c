@@ -218,6 +218,21 @@ inline static Expr cdar(Expr exp)
     return cdr(car(exp));
 }
 
+inline static Expr caddr(Expr exp)
+{
+    return car(cdr(cdr(exp)));
+}
+
+inline static Expr cdddr(Expr exp)
+{
+    return cdr(cdr(cdr(exp)));
+}
+
+inline static Expr cadddr(Expr exp)
+{
+    return car(cdr(cdr(cdr(exp))));
+}
+
 /* stream.h */
 
 #define LISP_MAX_STREAMS 64
