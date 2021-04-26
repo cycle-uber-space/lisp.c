@@ -780,14 +780,33 @@ void env_set(Expr env, Expr var, Expr val)
 
 Expr make_core_env()
 {
-    return nil;
+    Expr env = make_env(nil);
+    env_def(env, intern("t"), intern("t"));
+    return env;
 }
 
 /* eval.c */
 
 Expr eval(Expr exp, Expr env)
 {
-    return nil;
+    //fprintf(stderr, "EVAL %016" PRIx64 "\n", exp);
+    if (exp == nil)
+    {
+        return nil;
+    }
+
+    switch (expr_type(exp))
+    {
+    case TYPE_SYMBOL:
+        if (exp == intern("*env*"))
+        {
+            return env;
+        }
+        return env_get(env, exp);
+    default:
+        LISP_FAIL("cannot evaluate %s\n", repr(exp));
+        return nil;
+    }
 }
 
 /* system.c */
@@ -939,8 +958,12 @@ static void unit_test_eval(TestState * test)
 {
     LISP_TEST_GROUP(test, "eval");
     LISP_TEST_ASSERT(test, eval(nil, nil) == nil);
+
     {
         Expr env = make_core_env();
+        Expr t = intern("t");
+        LISP_TEST_ASSERT(test, eval(t, env) == t);
+
         LISP_TEST_ASSERT(test, eval(intern("*env*"), env) == env);
     }
 }
