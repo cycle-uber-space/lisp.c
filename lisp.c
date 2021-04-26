@@ -1,6 +1,10 @@
 
 /* lisp.h */
 
+#ifndef LISP_GLOBAL_API
+#define LISP_GLOBAL_API 1
+#endif
+
 #ifndef LISP_DEBUG
 #define LISP_DEBUG 1
 #endif
@@ -146,7 +150,9 @@ inline static bool is_symbol(Expr exp)
 
 Expr lisp_make_symbol(SymbolState * symbol, char const * name);
 
+#if LISP_GLOBAL_API
 Expr make_symbol(char const * name);
+#endif
 
 /* util.h */
 
@@ -337,10 +343,12 @@ Expr lisp_make_symbol(SymbolState * symbol, char const * name)
     return make_expr(TYPE_SYMBOL, index);
 }
 
+#if LISP_GLOBAL_API
 Expr make_symbol(char const * name)
 {
     return lisp_make_symbol(&global.symbol, name);
 }
+#endif
 
 /* util.c */
 
