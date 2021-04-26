@@ -86,6 +86,11 @@ enum
 
 #define nil 0
 
+inline static bool is_nil(Expr exp)
+{
+    return exp == nil;
+}
+
 /* test.c */
 
 #define LISP_TEST_FILE stdout
@@ -187,6 +192,7 @@ static void unit_test_nil(TestState * test)
     LISP_TEST_ASSERT(test, expr_type(nil) == TYPE_NIL);
     LISP_TEST_ASSERT(test, expr_data(nil) == DATA_NIL);
     LISP_TEST_ASSERT(test, (bool) nil == false);
+    LISP_TEST_ASSERT(test, is_nil(nil));
 }
 
 static void unit_test(TestState * test)
