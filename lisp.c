@@ -72,6 +72,20 @@ Expr make_expr(U64 type, U64 data);
 U64 expr_type(Expr exp);
 U64 expr_data(Expr exp);
 
+enum
+{
+    TYPE_NIL = 0,
+};
+
+enum
+{
+    DATA_NIL = 0,
+};
+
+/* nil.h */
+
+#define nil 0
+
 /* test.c */
 
 #define LISP_TEST_FILE stdout
@@ -167,10 +181,20 @@ static void unit_test_expr(TestState * test)
     LISP_TEST_ASSERT(test, expr_data(make_expr(23, 42)) == 42);
 }
 
+static void unit_test_nil(TestState * test)
+{
+    LISP_TEST_GROUP(test, "nil");
+    LISP_TEST_ASSERT(test, expr_type(nil) == TYPE_NIL);
+    LISP_TEST_ASSERT(test, expr_data(nil) == DATA_NIL);
+    LISP_TEST_ASSERT(test, (bool) nil == false);
+}
+
 static void unit_test(TestState * test)
 {
     LISP_TEST_BEGIN(test);
     unit_test_expr(test);
+    unit_test_nil(test);
+    LISP_TEST_GROUP(test, "summary");
     LISP_TEST_FINISH(test);
 }
 
