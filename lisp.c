@@ -717,7 +717,7 @@ static void unit_test_util(TestState * test)
 
     {
         Expr const foo = intern("foo");
-        Expr const bar = intern("foo");
+        Expr const bar = intern("bar");
         LISP_TEST_ASSERT(test, first(list_1(foo)) == foo);
         LISP_TEST_ASSERT(test, first(list_2(foo, bar)) == foo);
         LISP_TEST_ASSERT(test, second(list_2(foo, bar)) == bar);
