@@ -63,6 +63,14 @@ static void unit_test_stream(TestState * test)
     LISP_TEST_ASSERT(test, is_stream(global.stream.stderr));
 }
 
+static void unit_test_reader(TestState * test)
+{
+    LISP_TEST_GROUP(test, "reader");
+    LISP_TEST_ASSERT(test, read_one_from_string("nil") == nil);
+    LISP_TEST_ASSERT(test, read_one_from_string("foo") == intern("foo"));
+    LISP_TEST_ASSERT(test, read_one_from_string("()") == nil);
+}
+
 static void unit_test_printer(TestState * test)
 {
     LISP_TEST_GROUP(test, "printer");
@@ -152,6 +160,7 @@ static void unit_test(TestState * test)
     unit_test_symbol(test);
     unit_test_cons(test);
     unit_test_stream(test);
+    unit_test_reader(test);
     unit_test_printer(test);
     unit_test_util(test);
     unit_test_env(test);

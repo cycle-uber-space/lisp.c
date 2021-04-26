@@ -249,6 +249,10 @@ void stream_put_string(Expr exp, char const * str);
 
 void stream_release(Expr exp);
 
+/* reader.h */
+
+Expr read_one_from_string(char const * src);
+
 /* printer.h */
 
 void render_expr(Expr exp, Expr out);
