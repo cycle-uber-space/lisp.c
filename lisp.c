@@ -91,6 +91,15 @@ inline static bool is_nil(Expr exp)
     return exp == nil;
 }
 
+/* symbol.h */
+
+typedef struct
+{
+} SymbolState;
+
+void symbol_init(SymbolState * symbol);
+void symbol_quit(SymbolState * symbol);
+
 /* util.h */
 
 Expr intern(char const * name);
@@ -98,6 +107,23 @@ Expr intern(char const * name);
 /* eval.h */
 
 Expr eval(Expr exp, Expr env);
+
+/* system.h */
+
+typedef struct
+{
+    SymbolState symbol;
+} SystemState;
+
+void system_init(SystemState * system);
+void system_quit(SystemState * system);
+
+/* global.h */
+
+extern SystemState global;
+
+void global_init();
+void global_quit();
 
 /* test.c */
 
@@ -168,6 +194,16 @@ U64 expr_data(Expr exp)
     return exp >> 8;
 }
 
+/* symbol.c */
+
+void symbol_init(SymbolState * symbol)
+{
+}
+
+void symbol_quit(SymbolState * symbol)
+{
+}
+
 /* util.c */
 
 Expr intern(char const * name)
@@ -180,6 +216,32 @@ Expr intern(char const * name)
 Expr eval(Expr exp, Expr env)
 {
     return nil;
+}
+
+/* system.c */
+
+void system_init(SystemState * system)
+{
+    symbol_init(&system->symbol);
+}
+
+void system_quit(SystemState * system)
+{
+    symbol_quit(&system->symbol);
+}
+
+/* global.c */
+
+SystemState global;
+
+void global_init()
+{
+    system_init(&global);
+}
+
+void global_quit()
+{
+    system_quit(&global);
 }
 
 /* main.c */
@@ -249,8 +311,10 @@ int main(int argc, char ** argv)
     char const * cmd = argv[1];
     if (!strcmp("unit", cmd))
     {
+        global_init();
         TestState test;
         unit_test(&test);
+        global_quit();
     }
     else
     {
