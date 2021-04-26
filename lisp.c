@@ -608,6 +608,9 @@ static void unit_test_symbol(TestState * test)
 #if LISP_SYMBOL_NAME_OF_NIL
     LISP_TEST_ASSERT(test, !strcmp("nil", symbol_name(intern("nil"))));
 #endif
+
+    LISP_TEST_ASSERT(test, intern("foo") == intern("foo"));
+    LISP_TEST_ASSERT(test, intern("foo") != intern("bar"));
 }
 
 static void unit_test_cons(TestState * test)
@@ -624,6 +627,7 @@ static void unit_test_util(TestState * test)
     LISP_TEST_ASSERT(test, intern("nil") == nil);
     LISP_TEST_ASSERT(test, is_nil(intern("nil")));
     LISP_TEST_ASSERT(test, is_symbol(intern("nul")));
+
 }
 
 static void unit_test_eval(TestState * test)
