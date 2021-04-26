@@ -1,6 +1,15 @@
 
 #include "lisp.h"
 
+bool equal(Expr a, Expr b)
+{
+    if (is_cons(a) && is_cons(b))
+    {
+        return equal(car(a), car(b)) && equal(cdr(a), cdr(b));
+    }
+    return eq(a, b);
+}
+
 char const * repr(Expr exp)
 {
     // TODO multiple calls => need temp buffer per call
@@ -38,6 +47,11 @@ Expr list_1(Expr exp1)
 Expr list_2(Expr exp1, Expr exp2)
 {
     return cons(exp1, cons(exp2, nil));
+}
+
+Expr list_3(Expr exp1, Expr exp2, Expr exp3)
+{
+    return cons(exp1, cons(exp2, cons(exp3, nil)));
 }
 
 Expr first(Expr seq)

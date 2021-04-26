@@ -271,12 +271,20 @@ void render_expr(Expr exp, Expr out);
 
 /* util.h */
 
+inline static bool eq(Expr a, Expr b)
+{
+    return a == b;
+}
+
+bool equal(Expr a, Expr b);
+
 char const * repr(Expr exp);
 
 Expr intern(char const * name);
 
 Expr list_1(Expr exp1);
 Expr list_2(Expr exp1, Expr exp2);
+Expr list_3(Expr exp1, Expr exp2, Expr exp3);
 
 Expr first(Expr seq);
 Expr second(Expr seq);
