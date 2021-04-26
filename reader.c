@@ -55,9 +55,74 @@ comment:
     goto comment;
 }
 
+static Expr parse_expr(Expr in);
+
 static Expr parse_list(Expr in)
 {
-    return nil;
+    Expr exp = nil;
+    Expr head = nil;
+    Expr tail = nil;
+
+    if (stream_peek_char(in) != '(')
+    {
+        LISP_FAIL("expected '(', got '%c'\n", stream_peek_char(in));
+        return nil;
+    }
+
+    stream_skip_char(in);
+
+list_loop:
+    skip_whitespace_or_comment(in);
+
+    if (stream_peek_char(in) == 0)
+    {
+        LISP_FAIL("unexpected eof\n");
+        return nil;
+    }
+
+    if (stream_peek_char(in) == ')')
+    {
+        goto list_done;
+    }
+
+    exp = parse_expr(in);
+
+    // TODO get rid of artifical symbol dependence for dotted lists
+    if (exp == intern("."))
+    {
+        exp = parse_expr(in);
+        rplacd(tail, exp);
+
+        skip_whitespace_or_comment(in);
+
+        goto list_done;
+    }
+    else
+    {
+        Expr next = cons(exp, nil);
+        if (head)
+        {
+            rplacd(tail, next);
+            tail = next;
+        }
+        else
+        {
+            head = tail = next;
+        }
+    }
+
+    goto list_loop;
+
+list_done:
+    // TODO use expect_char(in, ')')
+    if (stream_peek_char(in) != ')')
+    {
+        LISP_FAIL("missing ')'\n");
+        return nil;
+    }
+    stream_skip_char(in);
+
+    return head;
 }
 
 static Expr parse_expr(Expr in)

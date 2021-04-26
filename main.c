@@ -69,6 +69,7 @@ static void unit_test_reader(TestState * test)
     LISP_TEST_ASSERT(test, read_one_from_string("nil") == nil);
     LISP_TEST_ASSERT(test, read_one_from_string("foo") == intern("foo"));
     LISP_TEST_ASSERT(test, read_one_from_string("()") == nil);
+    LISP_TEST_ASSERT(test, equal(read_one_from_string("(foo bar baz)"), list_3(intern("foo"), intern("bar"), intern("baz"))));
 }
 
 static void unit_test_printer(TestState * test)
