@@ -202,6 +202,10 @@ Expr list_2(Expr exp1, Expr exp2);
 Expr first(Expr seq);
 Expr second(Expr seq);
 
+/* core.h */
+
+Expr make_core_env();
+
 /* eval.h */
 
 Expr eval(Expr exp, Expr env);
@@ -556,6 +560,13 @@ Expr second(Expr seq)
     return car(cdr(seq));
 }
 
+/* core.c */
+
+Expr make_core_env()
+{
+    return nil;
+}
+
 /* eval.c */
 
 Expr eval(Expr exp, Expr env)
@@ -667,6 +678,10 @@ static void unit_test_eval(TestState * test)
 {
     LISP_TEST_GROUP(test, "eval");
     LISP_TEST_ASSERT(test, eval(nil, nil) == nil);
+    {
+        Expr env = make_core_env();
+        LISP_TEST_ASSERT(test, eval(intern("*env*"), env) == env);
+    }
 }
 
 static void unit_test(TestState * test)
