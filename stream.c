@@ -76,12 +76,64 @@ Expr lisp_make_string_input_stream(StreamState * stream, char const * str)
 {
     // TODO copy string into buffer?
     size_t const len = strlen(str);
-    return _make_buffer_stream(stream, len + 1, str);
+    return _make_buffer_stream(stream, len + 1, (char *) str);
 }
 
 Expr lisp_make_buffer_output_stream(StreamState * stream, size_t size, char * buffer)
 {
     return _make_buffer_stream(stream, size, buffer);
+}
+
+char lisp_stream_peek_char(StreamState * stream, Expr exp)
+{
+    U64 const index = expr_data(exp);
+    LISP_ASSERT(index < stream->num);
+    StreamInfo * info = stream->info + index;
+    if (info->file)
+    {
+        int ch = fgetc(info->file);
+        if (ch == EOF)
+        {
+            return 0;
+        }
+        ungetc(ch, info->file);
+        return ch;
+    }
+
+    if (info->buffer)
+    {
+        if (info->cursor < info->size)
+        {
+            return info->buffer[info->cursor];
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    LISP_FAIL("cannot read from stream\n");
+    return 0;
+}
+
+void lisp_stream_skip_char(StreamState * stream, Expr exp)
+{
+    U64 const index = expr_data(exp);
+    LISP_ASSERT(index < stream->num);
+    StreamInfo * info = stream->info + index;
+    if (info->file)
+    {
+        fgetc(info->file);
+        return;
+    }
+
+    if (info->buffer)
+    {
+        ++info->cursor;
+        return;
+    }
+
+    LISP_FAIL("cannot read from stream\n");
 }
 
 void lisp_stream_put_string(StreamState * stream, Expr exp, char const * str)
@@ -104,6 +156,13 @@ void lisp_stream_put_string(StreamState * stream, Expr exp, char const * str)
     }
 }
 
+void lisp_stream_put_char(StreamState * stream, Expr exp, char ch)
+{
+    // TODO make this more efficient
+    char const tmp[2] = { ch, 0 };
+    lisp_stream_put_string(stream, exp, tmp);
+}
+
 void lisp_stream_release(StreamState * stream, Expr exp)
 {
     LISP_ASSERT(is_stream(exp));
@@ -120,6 +179,21 @@ void lisp_stream_release(StreamState * stream, Expr exp)
 Expr make_string_input_stream(char const * str)
 {
     return lisp_make_string_input_stream(&global.stream, str);
+}
+
+char stream_peek_char(Expr exp)
+{
+    return lisp_stream_peek_char(&global.stream, exp);
+}
+
+void stream_skip_char(Expr exp)
+{
+    lisp_stream_skip_char(&global.stream, exp);
+}
+
+void stream_put_char(Expr exp, char ch)
+{
+    lisp_stream_put_char(&global.stream, exp, ch);
 }
 
 void stream_put_string(Expr exp, char const * str)

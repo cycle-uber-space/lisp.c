@@ -245,7 +245,19 @@ Expr lisp_make_buffer_output_stream(StreamState * stream, size_t size, char * bu
 
 Expr make_string_input_stream(char const * str);
 
+char stream_peek_char(Expr exp);
+void stream_skip_char(Expr exp);
+
+void stream_put_char(Expr exp, char ch);
 void stream_put_string(Expr exp, char const * str);
+
+inline static char stream_get_char(Expr exp)
+{
+    /* TODO inline implementation */
+    char const ret = stream_peek_char(exp);
+    stream_skip_char(exp);
+    return ret;
+}
 
 void stream_release(Expr exp);
 
