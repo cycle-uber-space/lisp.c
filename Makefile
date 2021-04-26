@@ -3,6 +3,7 @@
 .SUFFIXES:
 .PHONY: all clean
 
+CC = cc
 CFLAGS = -std=c11 -Wall -Wextra -Wno-unused-parameter -O2
 LDFLAGS = -Wall -Wextra -O2
 
@@ -13,7 +14,7 @@ clean:
 	rm -f lisp
 
 lisp: lisp.o
-	cc $(LDFLAGS) -o $@ $<
+	$(CC) $(LDFLAGS) -o $@ $<
 
 lisp.o: lisp.c
-	cc -c $(CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
