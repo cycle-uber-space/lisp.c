@@ -91,6 +91,10 @@ inline static bool is_nil(Expr exp)
     return exp == nil;
 }
 
+/* util.h */
+
+Expr intern(char const * name);
+
 /* eval.h */
 
 Expr eval(Expr exp, Expr env);
@@ -164,6 +168,13 @@ U64 expr_data(Expr exp)
     return exp >> 8;
 }
 
+/* util.c */
+
+Expr intern(char const * name)
+{
+    return nil;
+}
+
 /* eval.c */
 
 Expr eval(Expr exp, Expr env)
@@ -206,6 +217,12 @@ static void unit_test_nil(TestState * test)
     LISP_TEST_ASSERT(test, is_nil(nil));
 }
 
+static void unit_test_util(TestState * test)
+{
+    LISP_TEST_GROUP(test, "util");
+    LISP_TEST_ASSERT(test, intern("nil") == nil);
+}
+
 static void unit_test_eval(TestState * test)
 {
     LISP_TEST_GROUP(test, "eval");
@@ -217,6 +234,7 @@ static void unit_test(TestState * test)
     LISP_TEST_BEGIN(test);
     unit_test_expr(test);
     unit_test_nil(test);
+    unit_test_util(test);
     unit_test_eval(test);
     LISP_TEST_GROUP(test, "summary");
     LISP_TEST_FINISH(test);
