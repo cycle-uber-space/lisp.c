@@ -9,4 +9,4 @@ clean:
 	rm -f lisp
 
 lisp: lisp.c
-	cc -Wall -Wextra -Wno-unused-parameter -O2 -o $@ $<
+	cc -std=c11 -Wall -Wextra -Wno-unused-parameter -O2 -o $@ $<
