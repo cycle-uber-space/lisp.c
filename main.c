@@ -728,20 +728,6 @@ void system_quit(SystemState * system)
     symbol_quit(&system->symbol);
 }
 
-/* global.c */
-
-SystemState global;
-
-void global_init()
-{
-    system_init(&global);
-}
-
-void global_quit()
-{
-    system_quit(&global);
-}
-
 /* main.c */
 
 static void fail(char const * fmt, ...)
