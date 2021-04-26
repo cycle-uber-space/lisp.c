@@ -1,6 +1,10 @@
 
 /* lisp.h */
 
+#ifndef LISP_DEBUG
+#define LISP_DEBUG 1
+#endif
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -75,6 +79,22 @@ void test_begin(TestState * test);
 void test_finish(TestState * test);
 void test_group(TestState * test, char const * text);
 void test_assert_try(TestState * test, bool exp, char const * msg);
+
+/* error.h */
+
+#define LISP_FAIL(...)    error_fail(__VA_ARGS__);
+#define LISP_WARN(...)    error_warn(__VA_ARGS__);
+
+#define LISP_ASSERT(x) assert(x)
+
+#if LISP_DEBUG
+#define LISP_ASSERT_DEBUG(x) LISP_ASSERT(x)
+#else
+#define LISP_ASSERT_DEBUG(x)
+#endif
+
+void error_fail(char const * fmt, ...);
+void error_warn(char const * fmt, ...);
 
 /* expr.h */
 
@@ -185,6 +205,29 @@ void test_assert_try(TestState * test, bool exp, char const * msg)
             exit(1);
         }
     }
+}
+
+/* error.c */
+
+void error_fail(char const * fmt, ...)
+{
+    FILE * const file = stderr;
+    va_list ap;
+    va_start(ap, fmt);
+    fprintf(file, LISP_RED "[FAIL] " LISP_RESET);
+    vfprintf(file, fmt, ap);
+    va_end(ap);
+    exit(1);
+}
+
+void error_warn(char const * fmt, ...)
+{
+    FILE * const file = stderr;
+    va_list ap;
+    va_start(ap, fmt);
+    fprintf(file, LISP_YELLOW "[WARN] " LISP_RESET);
+    vfprintf(file, fmt, ap);
+    va_end(ap);
 }
 
 /* expr.c */
