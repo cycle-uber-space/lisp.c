@@ -196,6 +196,12 @@ Expr cdr(Expr exp);
 
 Expr intern(char const * name);
 
+Expr list_1(Expr exp1);
+Expr list_2(Expr exp1, Expr exp2);
+
+Expr first(Expr seq);
+Expr second(Expr seq);
+
 /* eval.h */
 
 Expr eval(Expr exp, Expr env);
@@ -530,6 +536,26 @@ Expr intern(char const * name)
     }
 }
 
+Expr list_1(Expr exp1)
+{
+    return cons(exp1, nil);
+}
+
+Expr list_2(Expr exp1, Expr exp2)
+{
+    return cons(exp1, cons(exp2, nil));
+}
+
+Expr first(Expr seq)
+{
+    return car(seq);
+}
+
+Expr second(Expr seq)
+{
+    return car(cdr(seq));
+}
+
 /* eval.c */
 
 Expr eval(Expr exp, Expr env)
@@ -628,6 +654,13 @@ static void unit_test_util(TestState * test)
     LISP_TEST_ASSERT(test, is_nil(intern("nil")));
     LISP_TEST_ASSERT(test, is_symbol(intern("nul")));
 
+    {
+        Expr const foo = intern("foo");
+        Expr const bar = intern("foo");
+        LISP_TEST_ASSERT(test, first(list_1(foo)) == foo);
+        LISP_TEST_ASSERT(test, first(list_2(foo, bar)) == foo);
+        LISP_TEST_ASSERT(test, second(list_2(foo, bar)) == bar);
+    }
 }
 
 static void unit_test_eval(TestState * test)
