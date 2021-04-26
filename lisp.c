@@ -19,6 +19,7 @@
 #include <stdbool.h>
 
 #include <assert.h>
+#include <inttypes.h>
 #include <string.h>
 
 #define LISP_RED     "\x1b[31m"
@@ -149,9 +150,11 @@ inline static bool is_symbol(Expr exp)
 }
 
 Expr lisp_make_symbol(SymbolState * symbol, char const * name);
+char const * lisp_symbol_name(SymbolState * symbol, Expr exp);
 
 #if LISP_GLOBAL_API
 Expr make_symbol(char const * name);
+char const * symbol_name(Expr exp);
 #endif
 
 /* util.h */
@@ -343,11 +346,28 @@ Expr lisp_make_symbol(SymbolState * symbol, char const * name)
     return make_expr(TYPE_SYMBOL, index);
 }
 
+char const * lisp_symbol_name(SymbolState * symbol, Expr exp)
+{
+    LISP_ASSERT(is_symbol(exp));
+    U64 const index = expr_data(exp);
+    if (index >= symbol->num)
+    {
+        LISP_FAIL("illegal symbol index %" PRIu64 "\n", index);
+    }
+    return symbol->names[index];
+}
+
 #if LISP_GLOBAL_API
 Expr make_symbol(char const * name)
 {
     return lisp_make_symbol(&global.symbol, name);
 }
+
+char const * symbol_name(Expr exp)
+{
+    return lisp_symbol_name(&global.symbol, exp);
+}
+
 #endif
 
 /* util.c */
@@ -432,6 +452,13 @@ static void unit_test_nil(TestState * test)
     LISP_TEST_ASSERT(test, is_nil(nil));
 }
 
+static void unit_test_symbol(TestState * test)
+{
+    LISP_TEST_GROUP(test, "symbol");
+    LISP_TEST_ASSERT(test, !strcmp("foo", symbol_name(intern("foo"))));
+    LISP_TEST_ASSERT(test, !strcmp("bar", symbol_name(intern("bar"))));
+}
+
 static void unit_test_util(TestState * test)
 {
     LISP_TEST_GROUP(test, "util");
@@ -451,6 +478,7 @@ static void unit_test(TestState * test)
     LISP_TEST_BEGIN(test);
     unit_test_expr(test);
     unit_test_nil(test);
+    unit_test_symbol(test);
     unit_test_util(test);
     unit_test_eval(test);
     LISP_TEST_GROUP(test, "summary");
