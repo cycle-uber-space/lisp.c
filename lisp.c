@@ -118,6 +118,7 @@ enum
     TYPE_NIL = 0,
     TYPE_SYMBOL,
     TYPE_CONS,
+    TYPE_STREAM,
 };
 
 enum
@@ -197,6 +198,20 @@ Expr cdr(Expr exp);
 void rplaca(Expr exp, Expr val);
 void rplacd(Expr exp, Expr val);
 
+/* stream.h */
+
+typedef struct
+{
+    Expr stdin;
+    Expr stdout;
+    Expr stderr;
+} StreamState;
+
+void stream_init(StreamState * stream);
+void stream_quit(StreamState * stream);
+
+bool is_stream(Expr exp);
+
 /* util.h */
 
 char const * repr(Expr exp);
@@ -235,6 +250,7 @@ typedef struct
 {
     SymbolState symbol;
     ConsState cons;
+    StreamState stream;
 } SystemState;
 
 void system_init(SystemState * system);
@@ -583,6 +599,22 @@ Expr cdar(Expr exp)
     return cdr(car(exp));
 }
 
+/* stream.c */
+
+void stream_init(StreamState * stream)
+{
+    memset(stream, 0, sizeof(StreamState));
+}
+
+void stream_quit(StreamState * stream)
+{
+}
+
+bool is_stream(Expr exp)
+{
+    return expr_type(exp) == TYPE_STREAM;
+}
+
 /* util.c */
 
 char const * repr(Expr exp)
@@ -815,10 +847,12 @@ void system_init(SystemState * system)
 {
     symbol_init(&system->symbol);
     cons_init(&system->cons);
+    stream_init(&system->stream);
 }
 
 void system_quit(SystemState * system)
 {
+    stream_quit(&system->stream);
     cons_quit(&system->cons);
     symbol_quit(&system->symbol);
 }
@@ -891,6 +925,14 @@ static void unit_test_cons(TestState * test)
     LISP_TEST_ASSERT(test, is_cons(cons(nil, nil)));
     LISP_TEST_ASSERT(test, car(cons(nil, nil)) == nil);
     LISP_TEST_ASSERT(test, cdr(cons(nil, nil)) == nil);
+}
+
+static void unit_test_stream(TestState * test)
+{
+    LISP_TEST_GROUP(test, "stream");
+    LISP_TEST_ASSERT(test, is_stream(global.stream.stdin));
+    LISP_TEST_ASSERT(test, is_stream(global.stream.stdout));
+    LISP_TEST_ASSERT(test, is_stream(global.stream.stderr));
 }
 
 static void unit_test_util(TestState * test)
@@ -975,6 +1017,7 @@ static void unit_test(TestState * test)
     unit_test_nil(test);
     unit_test_symbol(test);
     unit_test_cons(test);
+    unit_test_stream(test);
     unit_test_util(test);
     unit_test_env(test);
     unit_test_eval(test);
