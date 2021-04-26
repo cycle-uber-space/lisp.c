@@ -776,6 +776,13 @@ char const * repr(Expr exp)
     return buffer;
 }
 
+void println(Expr exp)
+{
+    Expr out = global.stream.stdout;
+    render_expr(exp, out);
+    stream_put_string(out, "\n");
+}
+
 Expr intern(char const * name)
 {
     if (!strcmp("nil", name))
