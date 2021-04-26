@@ -64,6 +64,14 @@ void test_finish(TestState * test);
 void test_group(TestState * test, char const * text);
 void test_assert_try(TestState * test, bool exp, char const * msg);
 
+/* expr.h */
+
+typedef U64 Expr;
+
+Expr make_expr(U64 type, U64 data);
+U64 expr_type(Expr exp);
+U64 expr_data(Expr exp);
+
 /* test.c */
 
 #define LISP_TEST_FILE stdout
@@ -114,6 +122,25 @@ void test_assert_try(TestState * test, bool exp, char const * msg)
     }
 }
 
+/* expr.c */
+
+typedef U64 Expr;
+
+Expr make_expr(U64 type, U64 data)
+{
+    return (data << 8) | (type & 0xff);
+}
+
+U64 expr_type(Expr exp)
+{
+    return exp & 0xff;
+}
+
+U64 expr_data(Expr exp)
+{
+    return exp >> 8;
+}
+
 /* main.c */
 
 static void fail(char const * fmt, ...)
@@ -133,9 +160,17 @@ static void fail(char const * fmt, ...)
     exit(1);
 }
 
+static void unit_test_expr(TestState * test)
+{
+    LISP_TEST_GROUP(test, "expr");
+    LISP_TEST_ASSERT(test, expr_type(make_expr(23, 42)) == 23);
+    LISP_TEST_ASSERT(test, expr_data(make_expr(23, 42)) == 42);
+}
+
 static void unit_test(TestState * test)
 {
     LISP_TEST_BEGIN(test);
+    unit_test_expr(test);
     LISP_TEST_FINISH(test);
 }
 
