@@ -17,6 +17,11 @@ Expr eval(Expr exp, Expr env)
             return env;
         }
         return env_get(env, exp);
+    case TYPE_CONS:
+        if (car(exp) == intern("quote"))
+        {
+            return cadr(exp);
+        }
     default:
         LISP_FAIL("cannot evaluate %s\n", repr(exp));
         return nil;

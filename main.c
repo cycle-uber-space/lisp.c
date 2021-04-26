@@ -139,6 +139,11 @@ static void unit_test_env(TestState * test)
     }
 }
 
+static Expr make_quote(Expr exp)
+{
+    return list_2(intern("quote"), exp);
+}
+
 static void unit_test_eval(TestState * test)
 {
     LISP_TEST_GROUP(test, "eval");
@@ -150,6 +155,9 @@ static void unit_test_eval(TestState * test)
         LISP_TEST_ASSERT(test, eval(t, env) == t);
 
         LISP_TEST_ASSERT(test, eval(intern("*env*"), env) == env);
+
+        Expr foo = intern("foo");
+        LISP_TEST_ASSERT(test, eval(make_quote(foo), env) == foo);
     }
 }
 

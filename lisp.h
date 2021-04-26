@@ -204,6 +204,11 @@ inline static Expr caar(Expr exp)
     return car(car(exp));
 }
 
+inline static Expr cadr(Expr exp)
+{
+    return car(cdr(exp));
+}
+
 inline static Expr cdar(Expr exp)
 {
     return cdr(car(exp));
