@@ -200,8 +200,19 @@ void rplacd(Expr exp, Expr val);
 
 /* stream.h */
 
+#define LISP_MAX_STREAMS 64
+
 typedef struct
 {
+    FILE * file;
+    bool close_on_quit;
+} StreamInfo;
+
+typedef struct
+{
+    U64 num;
+    StreamInfo info[LISP_MAX_STREAMS];
+
     Expr stdin;
     Expr stdout;
     Expr stderr;
@@ -211,6 +222,9 @@ void stream_init(StreamState * stream);
 void stream_quit(StreamState * stream);
 
 bool is_stream(Expr exp);
+
+Expr lisp_make_file_input_stream(StreamState * stream, FILE * file, bool close_on_quit);
+Expr lisp_make_file_output_stream(StreamState * stream, FILE * file, bool close_on_quit);
 
 /* util.h */
 
@@ -604,15 +618,47 @@ Expr cdar(Expr exp)
 void stream_init(StreamState * stream)
 {
     memset(stream, 0, sizeof(StreamState));
+
+    stream->stdin = lisp_make_file_input_stream(stream, stdin, false);
+    stream->stdout = lisp_make_file_output_stream(stream, stdout, false);
+    stream->stderr = lisp_make_file_output_stream(stream, stderr, false);
 }
 
 void stream_quit(StreamState * stream)
 {
+    for (U64 i = 0; i < stream->num; i++)
+    {
+        StreamInfo * info = stream->info + i;
+        if (info->close_on_quit)
+        {
+            fclose(info->file);
+        }
+    }
 }
 
 bool is_stream(Expr exp)
 {
     return expr_type(exp) == TYPE_STREAM;
+}
+
+static Expr _make_file_stream(StreamState * stream, FILE * file, bool close_on_quit)
+{
+    LISP_ASSERT(stream->num < LISP_MAX_STREAMS);
+    U64 const index = stream->num++;
+    StreamInfo * info = stream->info + index;
+    info->file = file;
+    info->close_on_quit = close_on_quit;
+    return make_expr(TYPE_STREAM, index);
+}
+
+Expr lisp_make_file_input_stream(StreamState * stream, FILE * file, bool close_on_quit)
+{
+    return _make_file_stream(stream, file, close_on_quit);
+}
+
+Expr lisp_make_file_output_stream(StreamState * stream, FILE * file, bool close_on_quit)
+{
+    return _make_file_stream(stream, file, close_on_quit);
 }
 
 /* util.c */
