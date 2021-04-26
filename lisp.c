@@ -9,9 +9,6 @@
 #define LISP_DEBUG 1
 #endif
 
-#define LISP_MAX_SYMBOLS -1
-#define LISP_DEF_SYMBOLS 16
-
 #ifndef LISP_SYMBOL_NAME_OF_NIL
 #define LISP_SYMBOL_NAME_OF_NIL 1
 #endif
@@ -137,6 +134,9 @@ inline static bool is_nil(Expr exp)
 }
 
 /* symbol.h */
+
+#define LISP_MAX_SYMBOLS -1
+#define LISP_DEF_SYMBOLS 16
 
 typedef struct
 {
