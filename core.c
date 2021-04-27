@@ -104,7 +104,7 @@ static void env_defun(Expr env, char const * name, BuiltinFun fun)
     env_def(env, intern(name), make_builtin(name, fun));
 }
 
-static void env_defspecial(Expr env, char const * name, BuiltinFun fun)
+static void env_defspecial(Expr env, char const * name, SpecialFun fun)
 {
     env_def(env, intern(name), make_special(name, fun));
 }
