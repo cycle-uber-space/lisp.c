@@ -124,6 +124,7 @@ enum
     TYPE_SYMBOL,
     TYPE_CONS,
     TYPE_STREAM,
+    TYPE_SPECIAL,
     TYPE_BUILTIN,
 };
 
@@ -301,6 +302,36 @@ inline static char stream_get_char(Expr exp)
 
 void stream_release(Expr exp);
 
+/* special.h */
+
+#define LISP_MAX_SPECIALS 64
+
+typedef Expr (* SpecialFun)(Expr args, Expr kwargs, Expr env); // TODO should we pass the system state?
+
+typedef struct
+{
+    char const * name;
+    SpecialFun fun;
+} SpecialInfo;
+
+typedef struct
+{
+    U64 num;
+    SpecialInfo info[LISP_MAX_SPECIALS];
+} SpecialState;
+
+void special_init(SpecialState * special);
+void special_quit(SpecialState * special);
+
+bool is_special(Expr exp);
+
+Expr lisp_make_special(SpecialState * special, char const * name, SpecialFun fun);
+
+char const * lisp_special_name(SpecialState * special, Expr exp);
+SpecialFun lisp_special_fun(SpecialState * special, Expr exp);
+
+Expr make_special(char const * name, SpecialFun fun);
+
 /* builtin.h */
 
 #define LISP_MAX_BUILTINS 64
@@ -397,6 +428,7 @@ typedef struct SystemState
     SymbolState symbol;
     ConsState cons;
     StreamState stream;
+    SpecialState special;
     BuiltinState builtin;
 } SystemState;
 
@@ -422,6 +454,11 @@ inline static bool stream_at_end(Expr exp)
 inline static BuiltinFun builtin_fun(Expr exp)
 {
     return lisp_builtin_fun(&global.builtin, exp);
+}
+
+inline static SpecialFun special_fun(Expr exp)
+{
+    return lisp_special_fun(&global.special, exp);
 }
 
 #endif

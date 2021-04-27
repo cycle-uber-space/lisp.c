@@ -55,6 +55,13 @@ Expr apply(Expr name, Expr args, Expr env)
         Expr vals = eval_list(args, env);
         return builtin_fun(func)(vals, kwargs, env);
     }
+    else if (is_special(func))
+    {
+        // TODO parse keyword args
+        Expr kwargs = nil;
+        Expr vals = args;
+        return special_fun(func)(vals, kwargs, env);
+    }
     else
     {
         LISP_FAIL("cannot apply %s to %s\n", repr(name), repr(args));
@@ -129,11 +136,14 @@ dispatch:
         }
         return env_get(env, exp);
     case TYPE_CONS:
+#if LISP_EVAL_QUOTE
         if (car(exp) == intern("quote"))
         {
             return cadr(exp);
         }
-        else if (car(exp) == intern("if"))
+        else
+#endif
+        if (car(exp) == intern("if"))
         {
             Expr const test = cadr(exp);
             Expr const then = caddr(exp);
