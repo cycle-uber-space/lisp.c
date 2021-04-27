@@ -269,6 +269,37 @@ int main(int argc, char ** argv)
         }
         global_quit();
     }
+    else if (!strcmp("repl", cmd))
+    {
+        global_init();
+        Expr env = make_core_env();
+
+        // TODO make a proper prompt input stream
+        Expr in = global.stream.stdin;
+    loop:
+        {
+            /* read */
+            // TODO use global.stream.stdout
+            fprintf(stdout, "> ");
+            fflush(stdout);
+
+            Expr exp = nil;
+            if (!maybe_parse_expr(in, &exp))
+            {
+                goto done;
+            }
+
+            /* eval */
+            Expr ret = eval(exp, env);
+
+            /* print */
+            println(ret);
+
+            goto loop;
+        }
+    done:
+        global_quit();
+    }
     else
     {
         fail("unknown command: %s\n", cmd);
