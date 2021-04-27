@@ -85,6 +85,8 @@ static void unit_test_reader(TestState * test)
 
     LISP_TEST_ASSERT(test, equal(read_one_from_string("'foo"), make_quote(foo)));
     LISP_TEST_ASSERT(test, equal(read_one_from_string("`foo"), make_backquote(foo)));
+    LISP_TEST_ASSERT(test, equal(read_one_from_string(",foo"), list_2(intern("unquote"), foo)));
+    LISP_TEST_ASSERT(test, equal(read_one_from_string(",@foo"), list_2(intern("unquote-splicing"), foo)));
 }
 
 static void unit_test_printer(TestState * test)

@@ -146,6 +146,16 @@ static Expr parse_expr(SystemState * sys, Expr in)
         Expr const exp = list_2(intern("backquote"), parse_expr(sys, in));
         return exp;
     }
+    else if (stream_peek_char(in) == ',')
+    {
+        stream_skip_char(in);
+        if (stream_peek_char(in) == '@')
+        {
+            stream_skip_char(in);
+            return list_2(intern("unquote-splicing"), parse_expr(sys, in));
+        }
+        return list_2(intern("unquote"), parse_expr(sys, in));
+    }
 #endif
     else if (is_symbol_start(stream_peek_char(in)))
     {
