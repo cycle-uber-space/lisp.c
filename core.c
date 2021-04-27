@@ -104,6 +104,13 @@ Expr s_quote(Expr args, Expr kwargs, Expr env)
     return car(args);
 }
 
+Expr s_def(Expr args, Expr kwargs, Expr env)
+{
+    // TODO look for env in kwargs
+    env_def(env, car(args), eval(cadr(args), env));
+    return nil;
+}
+
 Expr s_if(Expr args, Expr kwargs, Expr env)
 {
     if (eval(car(args), env) != nil)
@@ -138,6 +145,7 @@ Expr make_core_env()
 
     env_defspecial(env, "quote", s_quote);
     env_defspecial(env, "if", s_if);
+    env_defspecial(env, "def", s_def);
 
     env_defun(env, "eq", f_eq);
     env_defun(env, "equal", f_eq);
