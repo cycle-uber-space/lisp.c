@@ -182,6 +182,12 @@ static void unit_test_eval(TestState * test)
         LISP_TEST_ASSERT(test, !strcmp("t", eval_src("(eq nil nil nil)", env)));
         LISP_TEST_ASSERT(test, !strcmp("t", eval_src("(eq t t t)", env)));
 
+        LISP_TEST_ASSERT(test, !strcmp("t", eval_src("(equal nil nil)", env)));
+        LISP_TEST_ASSERT(test, !strcmp("nil", eval_src("(equal t nil)", env)));
+        LISP_TEST_ASSERT(test, !strcmp("nil", eval_src("(equal t nil t)", env)));
+        LISP_TEST_ASSERT(test, !strcmp("t", eval_src("(equal nil nil nil)", env)));
+        LISP_TEST_ASSERT(test, !strcmp("t", eval_src("(equal t t t)", env)));
+
         LISP_TEST_ASSERT(test, !strcmp("nil", eval_src("(println 'foo)", env)));
     }
 }
