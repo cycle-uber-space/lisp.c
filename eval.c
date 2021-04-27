@@ -11,7 +11,7 @@ Expr eval_list(Expr exps, Expr env)
         Expr const exp = car(tmp);
         ret = cons(eval(exp, env), ret);
     }
-    return ret;
+    return nreverse(ret);
 }
 
 Expr apply(Expr name, Expr args, Expr env)
