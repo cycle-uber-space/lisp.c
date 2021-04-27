@@ -176,6 +176,13 @@ void lisp_stream_release(StreamState * stream, Expr exp)
     memcpy(info, stream->info + --stream->num, sizeof(StreamInfo));
 }
 
+Expr make_file_input_stream_from_path(char const * path)
+{
+    FILE * file = fopen(path, "rb");
+    LISP_ASSERT(file);
+    return lisp_make_file_input_stream(&global.stream, file, true);
+}
+
 Expr make_string_input_stream(char const * str)
 {
     return lisp_make_string_input_stream(&global.stream, str);

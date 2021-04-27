@@ -273,6 +273,7 @@ Expr lisp_make_file_output_stream(StreamState * stream, FILE * file, bool close_
 
 Expr lisp_make_buffer_output_stream(StreamState * stream, size_t size, char * buffer);
 
+Expr make_file_input_stream_from_path(char const * path);
 Expr make_string_input_stream(char const * str);
 
 char stream_peek_char(Expr exp);
@@ -322,6 +323,8 @@ BuiltinFun lisp_builtin_fun(BuiltinState * builtin, Expr exp);
 Expr make_builtin(char const * name, BuiltinFun fun);
 
 /* reader.h */
+
+bool maybe_parse_expr(Expr in, Expr * exp);
 
 Expr read_one_from_string(char const * src);
 
@@ -385,6 +388,8 @@ typedef struct
 void system_init(SystemState * system);
 void system_quit(SystemState * system);
 
+void load_file(char const * path, Expr env);
+
 /* global.h */
 
 extern SystemState global;
@@ -395,6 +400,11 @@ void global_quit();
 inline static BuiltinFun builtin_fun(Expr exp)
 {
     return lisp_builtin_fun(&global.builtin, exp);
+}
+
+inline static bool stream_at_end(Expr exp)
+{
+    return stream_peek_char(exp) == 0;
 }
 
 #endif /* _LISP_H_ */
