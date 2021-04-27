@@ -102,6 +102,8 @@ void lisp_rplacd(ConsState * cons, Expr exp, Expr val)
     pair->b = val;
 }
 
+#if LISP_GLOBAL_API
+
 Expr cons(Expr a, Expr b)
 {
     return lisp_cons(&global.cons, a, b);
@@ -126,3 +128,5 @@ void rplacd(Expr exp, Expr val)
 {
     lisp_rplacd(&global.cons, exp, val);
 }
+
+#endif

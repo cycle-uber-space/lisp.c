@@ -136,6 +136,11 @@ void lisp_stream_skip_char(StreamState * stream, Expr exp)
     LISP_FAIL("cannot read from stream\n");
 }
 
+bool lisp_stream_at_end(StreamState * stream, Expr exp)
+{
+    return lisp_stream_peek_char(stream, exp) == 0;
+}
+
 void lisp_stream_put_string(StreamState * stream, Expr exp, char const * str)
 {
     LISP_ASSERT(is_stream(exp));
@@ -176,6 +181,8 @@ void lisp_stream_release(StreamState * stream, Expr exp)
     memcpy(info, stream->info + --stream->num, sizeof(StreamInfo));
 }
 
+#if LISP_GLOBAL_API
+
 Expr make_file_input_stream_from_path(char const * path)
 {
     FILE * file = fopen(path, "rb");
@@ -212,3 +219,5 @@ void stream_release(Expr exp)
 {
     lisp_stream_release(&global.stream, exp);
 }
+
+#endif

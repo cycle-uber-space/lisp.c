@@ -45,7 +45,11 @@ BuiltinFun lisp_builtin_fun(BuiltinState * builtin, Expr exp)
     return info->fun;
 }
 
+#if LISP_GLOBAL_API
+
 Expr make_builtin(char const * name, BuiltinFun fun)
 {
     return lisp_make_builtin(&global.builtin, name, fun);
 }
+
+#endif

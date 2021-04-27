@@ -55,9 +55,9 @@ comment:
     goto comment;
 }
 
-static Expr parse_expr(Expr in);
+static Expr parse_expr(SystemState * sys, Expr in);
 
-static Expr parse_list(Expr in)
+static Expr parse_list(SystemState * sys, Expr in)
 {
     Expr exp = nil;
     Expr head = nil;
@@ -85,13 +85,13 @@ list_loop:
         goto list_done;
     }
 
-    exp = parse_expr(in);
+    exp = parse_expr(sys, in);
 
     // TODO get rid of artifical symbol dependence for dotted lists
     if (exp == intern("."))
     {
-        exp = parse_expr(in);
-        rplacd(tail, exp);
+        exp = parse_expr(sys, in);
+        lisp_rplacd(&sys->cons, tail, exp);
 
         skip_whitespace_or_comment(in);
 
@@ -99,10 +99,10 @@ list_loop:
     }
     else
     {
-        Expr next = cons(exp, nil);
+        Expr next = lisp_cons(&sys->cons, exp, nil);
         if (head)
         {
-            rplacd(tail, next);
+            lisp_rplacd(&sys->cons, tail, next);
             tail = next;
         }
         else
@@ -125,26 +125,26 @@ list_done:
     return head;
 }
 
-static Expr parse_expr(Expr in)
+static Expr parse_expr(SystemState * sys, Expr in)
 {
     skip_whitespace_or_comment(in);
 
     if (stream_peek_char(in) == '(')
     {
-        return parse_list(in);
+        return parse_list(sys, in);
     }
 #if LISP_READER_PARSE_QUOTE
     else if (stream_peek_char(in) == '\'')
     {
         stream_skip_char(in);
-        Expr const exp = list_2(intern("quote"), parse_expr(in));
+        Expr const exp = list_2(intern("quote"), parse_expr(sys, in));
         return exp;
     }
 #endif
     else if (is_symbol_start(stream_peek_char(in)))
     {
         char lexeme[4096];
-        Expr tok = lisp_make_buffer_output_stream(&global.stream, 4096, lexeme);
+        Expr tok = lisp_make_buffer_output_stream(&sys->stream, 4096, lexeme);
         stream_put_char(tok, stream_get_char(in));
 
     symbol_loop:
@@ -171,22 +171,32 @@ static Expr parse_expr(Expr in)
     }
 }
 
-bool maybe_parse_expr(Expr in, Expr * exp)
+bool lisp_maybe_parse_expr(SystemState * sys, Expr in, Expr * exp)
 {
     skip_whitespace_or_comment(in);
-    if (stream_at_end(in))
+    if (lisp_stream_at_end(&sys->stream, in))
     {
         return false;
     }
-    *exp = parse_expr(in);
+    *exp = parse_expr(sys, in);
     return true;
+}
+
+Expr lisp_read_one_from_string(SystemState * sys, char const * src)
+{
+    Expr const in = lisp_make_string_input_stream(&sys->stream, src);
+    Expr ret = parse_expr(sys, in);
+    lisp_stream_release(&sys->stream, in);
+    //println(ret);
+    return ret;
+}
+
+bool maybe_parse_expr(Expr in, Expr * exp)
+{
+    return lisp_maybe_parse_expr(&global, in, exp);
 }
 
 Expr read_one_from_string(char const * src)
 {
-    Expr const in = make_string_input_stream(src);
-    Expr ret = parse_expr(in);
-    stream_release(in);
-    //println(ret);
-    return ret;
+    return lisp_read_one_from_string(&global, src);
 }

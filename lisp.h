@@ -132,6 +132,8 @@ enum
     DATA_NIL = 0,
 };
 
+typedef struct SystemState SystemState;
+
 /* nil.h */
 
 #define nil 0
@@ -197,10 +199,11 @@ Expr lisp_cdr(ConsState * cons, Expr exp);
 void lisp_rplaca(ConsState * cons, Expr exp, Expr val);
 void lisp_rplacd(ConsState * cons, Expr exp, Expr val);
 
+#if LISP_GLOBAL_API
+
 Expr cons(Expr a, Expr b);
 Expr car(Expr exp);
 Expr cdr(Expr exp);
-
 void rplaca(Expr exp, Expr val);
 void rplacd(Expr exp, Expr val);
 
@@ -239,6 +242,8 @@ inline static Expr cadddr(Expr exp)
     return car(cdr(cdr(cdr(exp))));
 }
 
+#endif
+
 /* stream.h */
 
 #define LISP_MAX_STREAMS 64
@@ -270,8 +275,12 @@ bool is_stream(Expr exp);
 
 Expr lisp_make_file_input_stream(StreamState * stream, FILE * file, bool close_on_quit);
 Expr lisp_make_file_output_stream(StreamState * stream, FILE * file, bool close_on_quit);
-
+Expr lisp_make_string_input_stream(StreamState * stream, char const * str);
 Expr lisp_make_buffer_output_stream(StreamState * stream, size_t size, char * buffer);
+
+bool lisp_stream_at_end(StreamState * stream, Expr exp);
+
+void lisp_stream_release(StreamState * stream, Expr exp);
 
 Expr make_file_input_stream_from_path(char const * path);
 Expr make_string_input_stream(char const * str);
@@ -324,9 +333,14 @@ Expr make_builtin(char const * name, BuiltinFun fun);
 
 /* reader.h */
 
-bool maybe_parse_expr(Expr in, Expr * exp);
+bool lisp_maybe_parse_expr(SystemState * system, Expr in, Expr * exp);
 
+Expr lisp_read_one_from_string(SystemState * system, char const * src);
+
+#if LISP_GLOBAL_API
+bool maybe_parse_expr(Expr in, Expr * exp);
 Expr read_one_from_string(char const * src);
+#endif
 
 /* printer.h */
 
@@ -377,7 +391,7 @@ Expr eval(Expr exp, Expr env);
 
 /* system.h */
 
-typedef struct
+typedef struct SystemState
 {
     SymbolState symbol;
     ConsState cons;
@@ -392,19 +406,23 @@ void load_file(char const * path, Expr env);
 
 /* global.h */
 
+#if LISP_GLOBAL_API
+
 extern SystemState global;
 
 void global_init();
 void global_quit();
+
+inline static bool stream_at_end(Expr exp)
+{
+    return lisp_stream_at_end(&global.stream, exp);
+}
 
 inline static BuiltinFun builtin_fun(Expr exp)
 {
     return lisp_builtin_fun(&global.builtin, exp);
 }
 
-inline static bool stream_at_end(Expr exp)
-{
-    return stream_peek_char(exp) == 0;
-}
+#endif
 
 #endif /* _LISP_H_ */
