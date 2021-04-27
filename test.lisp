@@ -8,13 +8,18 @@
 
 (load-file "std.lisp")
 
-(defmacro test (exp)
-  `(println ',exp '=> ,exp))
+(defun test-report (exp val res)
+  (if (equal val res)
+      (println 'PASS exp '=> res)
+      (println 'FAIL exp '=> val '!= res)))
 
-(test nil)
-(test t)
+(defmacro test (exp res)
+  `(test-report ',exp ,exp ',res))
 
-(test 'foo)
+(test nil nil)
+(test t t)
 
-(test (if nil 'a 'b))
-(test (if 'eq 'a 'b))
+(test 'foo foo)
+
+(test (if nil 'a 'b) a)
+(test (if 'eq 'a 'b) a)
