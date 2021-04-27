@@ -55,6 +55,14 @@ void render_builtin(Expr exp, Expr out)
     stream_put_string(out, ">");
 }
 
+void render_gensym(Expr exp, Expr out)
+{
+    LISP_ASSERT_DEBUG(is_gensym(exp));
+    U64 const num = expr_data(exp);
+    stream_put_string(out, "#:G");
+    stream_put_u64(out, num);
+}
+
 void render_expr(Expr exp, Expr out)
 {
     switch (expr_type(exp))
@@ -68,6 +76,9 @@ void render_expr(Expr exp, Expr out)
         break;
     case TYPE_CONS:
         render_cons(exp, out);
+        break;
+    case TYPE_GENSYM:
+        render_gensym(exp, out);
         break;
     case TYPE_SPECIAL:
         render_special(exp, out);

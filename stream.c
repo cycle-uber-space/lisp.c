@@ -215,6 +215,13 @@ void stream_put_string(Expr exp, char const * str)
     lisp_stream_put_string(&global.stream, exp, str);
 }
 
+void stream_put_u64(Expr exp, U64 val)
+{
+    char str[32];
+    sprintf(str, "%" PRIu64, val);
+    stream_put_string(exp, str);
+}
+
 void stream_release(Expr exp)
 {
     lisp_stream_release(&global.stream, exp);
