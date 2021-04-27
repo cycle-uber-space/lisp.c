@@ -332,6 +332,7 @@ void stream_skip_char(Expr exp);
 void stream_put_char(Expr exp, char ch);
 void stream_put_string(Expr exp, char const * str);
 void stream_put_u64(Expr exp, U64 val);
+void stream_put_x64(Expr exp, U64 val);
 
 inline static char stream_get_char(Expr exp)
 {

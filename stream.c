@@ -222,6 +222,13 @@ void stream_put_u64(Expr exp, U64 val)
     stream_put_string(exp, str);
 }
 
+void stream_put_x64(Expr exp, U64 val)
+{
+    char str[32];
+    sprintf(str, "%016" PRIu64, val);
+    stream_put_string(exp, str);
+}
+
 void stream_release(Expr exp)
 {
     lisp_stream_release(&global.stream, exp);

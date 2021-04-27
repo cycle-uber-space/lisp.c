@@ -63,6 +63,47 @@ void render_gensym(Expr exp, Expr out)
     stream_put_u64(out, num);
 }
 
+void render_string(Expr exp, Expr out)
+{
+    stream_put_char(out, '"');
+    char const * str = string_value(exp);
+    size_t const len = string_length(exp);
+    for (size_t i = 0; i < len; ++i)
+    {
+        // TODO \u****
+        // TODO \U********
+        char const ch = str[i];
+        switch (ch)
+        {
+        case '"':
+            stream_put_char(out, '\\');
+            stream_put_char(out, '"');
+            break;
+        case '\n':
+            stream_put_char(out, '\\');
+            stream_put_char(out, 'n');
+            break;
+        case '\t':
+            stream_put_char(out, '\\');
+            stream_put_char(out, 't');
+            break;
+        default:
+            if (ch == 0x1b) // TODO use a function to test what to escape
+            {
+                stream_put_char(out, '\\');
+                stream_put_char(out, 'x');
+                stream_put_x64(out, ch);
+            }
+            else
+            {
+                stream_put_char(out, ch);
+            }
+            break;
+        }
+    }
+    stream_put_char(out, '"');
+}
+
 void render_expr(Expr exp, Expr out)
 {
     switch (expr_type(exp))
@@ -79,6 +120,9 @@ void render_expr(Expr exp, Expr out)
         break;
     case TYPE_GENSYM:
         render_gensym(exp, out);
+        break;
+    case TYPE_STRING:
+        render_string(exp, out);
         break;
     case TYPE_SPECIAL:
         render_special(exp, out);
