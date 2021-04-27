@@ -395,6 +395,8 @@ void render_expr(Expr exp, Expr out);
 
 /* util.h */
 
+char * get_temp_buf(size_t size);
+
 inline static bool eq(Expr a, Expr b)
 {
     return a == b;

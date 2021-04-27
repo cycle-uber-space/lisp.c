@@ -1,6 +1,20 @@
 
 #include "lisp.h"
 
+#define TEMP_BUF_SIZE  4096
+#define TEMP_BUF_COUNT 4
+
+char * get_temp_buf(size_t size)
+{
+    LISP_ASSERT(size <= TEMP_BUF_SIZE);
+
+    static char buf[TEMP_BUF_COUNT][TEMP_BUF_SIZE];
+    static int idx = 0;
+    char * ret = buf[idx];
+    idx = (idx + 1) % TEMP_BUF_COUNT;
+    return ret;
+}
+
 bool equal(Expr a, Expr b)
 {
     if (is_cons(a) && is_cons(b))
@@ -13,8 +27,9 @@ bool equal(Expr a, Expr b)
 char const * repr(Expr exp)
 {
     // TODO multiple calls => need temp buffer per call
-    static char buffer[4096] = { 0 };
-    Expr out = lisp_make_buffer_output_stream(&global.stream, 4096, buffer);
+    size_t const size = 4096;
+    char * buffer = get_temp_buf(size);
+    Expr out = lisp_make_buffer_output_stream(&global.stream, size, buffer);
     render_expr(exp, out);
     stream_release(out);
     return buffer;
