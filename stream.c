@@ -51,7 +51,7 @@ static Expr _make_buffer_stream(StreamState * stream, size_t size, char * buffer
     return make_expr(TYPE_STREAM, index);
 }
 
-static void lisp_stream_show_info(StreamState * stream)
+void lisp_stream_show_info(StreamState * stream)
 {
     for (U64 i = 0; i < stream->num; i++)
     {
