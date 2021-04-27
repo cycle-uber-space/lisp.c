@@ -451,9 +451,19 @@ inline static bool stream_at_end(Expr exp)
     return lisp_stream_at_end(&global.stream, exp);
 }
 
+inline static char const * builtin_name(Expr exp)
+{
+    return lisp_builtin_name(&global.builtin, exp);
+}
+
 inline static BuiltinFun builtin_fun(Expr exp)
 {
     return lisp_builtin_fun(&global.builtin, exp);
+}
+
+inline static char const * special_name(Expr exp)
+{
+    return lisp_special_name(&global.special, exp);
 }
 
 inline static SpecialFun special_fun(Expr exp)

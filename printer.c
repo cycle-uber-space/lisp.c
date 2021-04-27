@@ -31,6 +31,30 @@ void render_cons(Expr exp, Expr out)
     stream_put_char(out, ')');
 }
 
+void render_special(Expr exp, Expr out)
+{
+    stream_put_string(out, "#:<special operator");
+    char const * name = special_name(exp);
+    if (name)
+    {
+        stream_put_string(out, " ");
+        stream_put_string(out, name);
+    }
+    stream_put_string(out, ">");
+}
+
+void render_builtin(Expr exp, Expr out)
+{
+    stream_put_string(out, "#:<core function");
+    char const * name = builtin_name(exp);
+    if (name)
+    {
+        stream_put_string(out, " ");
+        stream_put_string(out, name);
+    }
+    stream_put_string(out, ">");
+}
+
 void render_expr(Expr exp, Expr out)
 {
     switch (expr_type(exp))
@@ -44,6 +68,12 @@ void render_expr(Expr exp, Expr out)
         break;
     case TYPE_CONS:
         render_cons(exp, out);
+        break;
+    case TYPE_SPECIAL:
+        render_special(exp, out);
+        break;
+    case TYPE_BUILTIN:
+        render_builtin(exp, out);
         break;
     default:
         LISP_FAIL("cannot print expression %016" PRIx64 "\n", exp);
