@@ -207,6 +207,8 @@ dispatch:
 
     switch (expr_type(exp))
     {
+    case TYPE_STRING:
+        return exp;
     case TYPE_SYMBOL:
         if (exp == intern("*env*"))
         {
