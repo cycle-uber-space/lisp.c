@@ -23,3 +23,10 @@
 
 (test (if nil 'a 'b) a)
 (test (if 'eq 'a 'b) a)
+
+(test (equal '(a . b) '(a . b)) t)
+
+(test (cons 'a 'b) (a . b))
+
+(test (car (cons 'a 'b)) a)
+(test (cdr (cons 'a 'b)) b)
