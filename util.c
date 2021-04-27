@@ -63,3 +63,35 @@ Expr second(Expr seq)
 {
     return car(cdr(seq));
 }
+
+Expr nreverse(Expr list)
+{
+    if (!list)
+    {
+        return list;
+    }
+
+    Expr prev = nil;
+    Expr expr = list;
+    while (is_cons(expr))
+    {
+        Expr next = cdr(expr);
+        rplacd(expr, prev);
+        prev = expr;
+        expr = next;
+    }
+    if (expr)
+    {
+        Expr iter;
+        for (iter = prev; cdr(iter); iter = cdr(iter))
+        {
+            Expr next = car(iter);
+            rplaca(iter, expr);
+            expr = next;
+        }
+        Expr next = car(iter);
+        rplaca(iter, expr);
+        rplacd(iter, next);
+    }
+    return prev;
+}

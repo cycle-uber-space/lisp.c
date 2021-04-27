@@ -314,6 +314,8 @@ Expr list_3(Expr exp1, Expr exp2, Expr exp3);
 Expr first(Expr seq);
 Expr second(Expr seq);
 
+Expr nreverse(Expr seq);
+
 /* env.h */
 
 Expr make_env(Expr outer);
