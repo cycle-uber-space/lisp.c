@@ -14,10 +14,6 @@
 #define LISP_SYMBOL_NAME_OF_NIL 1
 #endif
 
-#ifndef LISP_READER_PARSE_QUOTE
-#define LISP_READER_PARSE_QUOTE 1
-#endif
-
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -406,6 +402,10 @@ Expr make_builtin(char const * name, BuiltinFun fun);
 
 /* reader.h */
 
+#ifndef LISP_READER_PARSE_QUOTE
+#define LISP_READER_PARSE_QUOTE 1
+#endif
+
 bool lisp_maybe_parse_expr(SystemState * system, Expr in, Expr * exp);
 
 Expr lisp_read_one_from_string(SystemState * system, char const * src);
@@ -416,6 +416,10 @@ Expr read_one_from_string(char const * src);
 #endif
 
 /* printer.h */
+
+#ifndef LISP_PRINTER_RENDER_QUOTE
+#define LISP_PRINTER_RENDER_QUOTE 1
+#endif
 
 void render_expr(Expr exp, Expr out);
 

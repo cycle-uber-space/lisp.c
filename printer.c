@@ -1,10 +1,23 @@
 
 #include "lisp.h"
 
+static bool is_quote_call(Expr exp)
+{
+    return is_cons(exp) && eq(car(exp), intern("quote"));
+}
+
 void render_expr(Expr exp, Expr out);
 
 void render_cons(Expr exp, Expr out)
 {
+#if LISP_PRINTER_RENDER_QUOTE
+    if (is_quote_call(exp))
+    {
+        stream_put_char(out, '\'');
+        render_expr(cadr(exp), out);
+        return;
+    }
+#endif
     stream_put_char(out, '(');
     render_expr(car(exp), out);
 
