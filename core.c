@@ -146,6 +146,7 @@ Expr f_equal(Expr args, Expr kwargs, Expr env)
     {
         LISP_FAIL("not enough arguments in call %s\n", repr(cons(intern("equal"), args)));
     }
+
     for (; tmp; tmp = cdr(tmp))
     {
         Expr const exp = car(tmp);
@@ -229,7 +230,7 @@ Expr make_core_env()
     env_defspecial(env, "backquote", s_backquote);
 
     env_defun(env, "eq", f_eq);
-    env_defun(env, "equal", f_eq);
+    env_defun(env, "equal", f_equal);
     env_defun(env, "cons", f_cons);
     env_defun(env, "car", f_car);
     env_defun(env, "cdr", f_cdr);
