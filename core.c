@@ -1,6 +1,16 @@
 
 #include "lisp.h"
 
+static void env_defun(Expr env, char const * name, BuiltinFun fun)
+{
+    env_def(env, intern(name), make_builtin(name, fun));
+}
+
+static void env_defspecial(Expr env, char const * name, SpecialFun fun)
+{
+    env_def(env, intern(name), make_special(name, fun));
+}
+
 Expr s_quote(Expr args, Expr kwargs, Expr env)
 {
     return car(args);
@@ -139,16 +149,6 @@ Expr f_println(Expr args, Expr kwargs, Expr env)
 Expr f_gensym(Expr args, Expr kwargs, Expr env)
 {
     return lisp_gensym(&global.gensym);
-}
-
-static void env_defun(Expr env, char const * name, BuiltinFun fun)
-{
-    env_def(env, intern(name), make_builtin(name, fun));
-}
-
-static void env_defspecial(Expr env, char const * name, SpecialFun fun)
-{
-    env_def(env, intern(name), make_special(name, fun));
 }
 
 Expr make_core_env()
