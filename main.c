@@ -13,7 +13,8 @@ static void fail(char const * fmt, ...)
     fprintf(stderr,
             "usage: lisp <command> <options>\n"
             "commands:\n"
-            "  unit .... run unit tests\n"
+            "  unit ......... run unit tests\n"
+            "  load {FILE} .. load source files\n"
         );
     exit(1);
 }
@@ -240,6 +241,16 @@ int main(int argc, char ** argv)
         unit_test(test);
         LISP_TEST_GROUP(test, "summary");
         LISP_TEST_FINISH(test);
+        global_quit();
+    }
+    else if (!strcmp("load", cmd))
+    {
+        global_init();
+        Expr env = make_core_env();
+        for (int i = 2; i < argc; i++)
+        {
+            load_file(argv[i], env);
+        }
         global_quit();
     }
     else

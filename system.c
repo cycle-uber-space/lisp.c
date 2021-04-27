@@ -16,3 +16,14 @@ void system_quit(SystemState * system)
     cons_quit(&system->cons);
     symbol_quit(&system->symbol);
 }
+
+void load_file(char const * path, Expr env)
+{
+    Expr const in = make_file_input_stream_from_path(path);
+    Expr exp = nil;
+    while (maybe_parse_expr(in, &exp))
+    {
+        eval(exp, env);
+    }
+    stream_release(in);
+}

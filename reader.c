@@ -171,6 +171,17 @@ static Expr parse_expr(Expr in)
     }
 }
 
+bool maybe_parse_expr(Expr in, Expr * exp)
+{
+    skip_whitespace_or_comment(in);
+    if (stream_at_end(in))
+    {
+        return false;
+    }
+    *exp = parse_expr(in);
+    return true;
+}
+
 Expr read_one_from_string(char const * src)
 {
     Expr const in = make_string_input_stream(src);
