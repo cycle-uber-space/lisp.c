@@ -175,6 +175,8 @@ static void unit_test_eval(TestState * test)
 #endif
         LISP_TEST_ASSERT(test, !strcmp("foo", eval_src("(if t (quote foo) (quote bar))", env)));
         LISP_TEST_ASSERT(test, !strcmp("bar", eval_src("(if nil (quote foo) (quote bar))", env)));
+
+        LISP_TEST_ASSERT(test, !strcmp("nil", eval_src("(println 'foo)", env)));
     }
 }
 
