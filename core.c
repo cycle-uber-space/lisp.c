@@ -49,6 +49,35 @@ Expr f_equal(Expr args, Expr kwargs, Expr env)
     return intern("t");
 }
 
+Expr f_cons(Expr args, Expr kwargs, Expr env)
+{
+    LISP_ASSERT(args != nil);
+    LISP_ASSERT(cdr(args) != nil);
+    LISP_ASSERT(cddr(args) == nil);
+
+    Expr const exp1 = car(args);
+    Expr const exp2 = cadr(args);
+    return cons(exp1, exp2);
+}
+
+Expr f_car(Expr args, Expr kwargs, Expr env)
+{
+    LISP_ASSERT(args != nil);
+    LISP_ASSERT(cdr(args) == nil);
+
+    Expr const exp1 = car(args);
+    return car(exp1);
+}
+
+Expr f_cdr(Expr args, Expr kwargs, Expr env)
+{
+    LISP_ASSERT(args != nil);
+    LISP_ASSERT(cdr(args) == nil);
+
+    Expr const exp1 = car(args);
+    return cdr(exp1);
+}
+
 Expr f_println(Expr args, Expr kwargs, Expr env)
 {
     Expr out = global.stream.stdout;
@@ -76,6 +105,9 @@ Expr make_core_env()
     env_def(env, intern("t"), intern("t"));
     env_defun(env, "eq", f_eq);
     env_defun(env, "equal", f_eq);
+    env_defun(env, "cons", f_cons);
+    env_defun(env, "car", f_car);
+    env_defun(env, "cdr", f_cdr);
     env_defun(env, "println", f_println);
     return env;
 }
