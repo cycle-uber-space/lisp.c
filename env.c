@@ -152,3 +152,36 @@ void env_set(Expr env, Expr var, Expr val)
         LISP_FAIL("unbound variable %s\n", repr(var));
     }
 }
+
+void env_destructuring_bind(Expr env, Expr vars, Expr vals)
+{
+    if (vars == nil)
+    {
+        if (vals != nil)
+        {
+            LISP_FAIL("no more parameters to bind\n");
+        }
+    }
+    else if (is_cons(vars))
+    {
+        while (vars)
+        {
+            if (is_cons(vars))
+            {
+                LISP_ASSERT(is_cons(vals));
+                env_destructuring_bind(env, car(vars), car(vals));
+                vars = cdr(vars);
+                vals = cdr(vals);
+            }
+            else
+            {
+                env_destructuring_bind(env, vars, vals);
+                break;
+            }
+        }
+    }
+    else
+    {
+        env_def(env, vars, vals);
+    }
+}

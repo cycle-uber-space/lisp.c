@@ -244,6 +244,11 @@ inline static Expr cadddr(Expr exp)
     return car(cdr(cdr(cdr(exp))));
 }
 
+inline static Expr cddddr(Expr exp)
+{
+    return cdr(cdr(cdr(cdr(exp))));
+}
+
 #endif
 
 /* gensym.h */
@@ -430,6 +435,8 @@ bool env_can_set(Expr env, Expr var);
 
 Expr env_get(Expr env, Expr var);
 void env_set(Expr env, Expr var, Expr val);
+
+void env_destructuring_bind(Expr env, Expr vars, Expr vals);
 
 /* core.h */
 

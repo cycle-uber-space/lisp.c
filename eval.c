@@ -45,6 +45,61 @@ Expr eval_list(Expr exps, Expr env)
     return nreverse(ret);
 }
 
+Expr eval_body(Expr exps, Expr env)
+{
+    Expr ret = nil;
+    for (Expr tmp = exps; tmp; tmp = cdr(tmp))
+    {
+        Expr const exp = car(tmp);
+        ret = eval(exp, env);
+    }
+    return ret;
+}
+
+/* TODO move these */
+
+/* (lit clo <env> <args> . <body>) */
+
+bool is_function(Expr exp)
+{
+    return is_cons(exp) &&
+        eq(intern("lit"), car(exp)) &&
+        is_cons(cdr(exp)) &&
+        eq(intern("clo"), cadr(exp));
+}
+
+Expr function_env(Expr exp)
+{
+    return caddr(exp);
+}
+
+Expr function_args(Expr exp)
+{
+    return cadddr(exp);
+}
+
+Expr function_body(Expr exp)
+{
+    return cddddr(exp);
+}
+
+static void bind_args(Expr env, Expr vars, Expr vals)
+{
+    env_destructuring_bind(env, vars, vals);
+}
+
+static Expr wrap_env(Expr lenv)
+{
+    return make_env(lenv);
+}
+
+static Expr make_call_env_from(Expr lenv, Expr vars, Expr vals)
+{
+    Expr cenv = wrap_env(lenv);
+    bind_args(cenv, vars, vals);
+    return cenv;
+}
+
 Expr apply(Expr name, Expr args, Expr env)
 {
     Expr func = eval(name, env);
@@ -61,6 +116,14 @@ Expr apply(Expr name, Expr args, Expr env)
         Expr kwargs = nil;
         Expr vals = args;
         return special_fun(func)(vals, kwargs, env);
+    }
+    else if (is_function(func))
+    {
+        // TODO parse keyword args
+        Expr kwargs = nil;
+        Expr vals = eval_list(args, env);
+        Expr body = function_body(func);
+        return eval_body(body, make_call_env_from(function_env(func), function_args(func), vals));
     }
     else
     {
