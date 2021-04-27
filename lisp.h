@@ -123,6 +123,7 @@ enum
     TYPE_NIL = 0,
     TYPE_SYMBOL,
     TYPE_CONS,
+    TYPE_GENSYM,
     TYPE_STREAM,
     TYPE_SPECIAL,
     TYPE_BUILTIN,
@@ -244,6 +245,20 @@ inline static Expr cadddr(Expr exp)
 }
 
 #endif
+
+/* gensym.h */
+
+typedef struct
+{
+    U64 counter;
+} GensymState;
+
+void gensym_init(GensymState * gensym);
+void gensym_quit(GensymState * gensym);
+
+bool is_gensym(Expr exp);
+
+Expr lisp_gensym(GensymState * gensym);
 
 /* stream.h */
 
@@ -428,6 +443,7 @@ typedef struct SystemState
     SymbolState symbol;
     ConsState cons;
     StreamState stream;
+    GensymState gensym;
     SpecialState special;
     BuiltinState builtin;
 } SystemState;
