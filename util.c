@@ -4,6 +4,11 @@
 #define TEMP_BUF_SIZE  4096
 #define TEMP_BUF_COUNT 4
 
+bool is_named_call(Expr exp, Expr name)
+{
+    return is_cons(exp) && eq(car(exp), name);
+}
+
 char * get_temp_buf(size_t size)
 {
     LISP_ASSERT(size <= TEMP_BUF_SIZE);

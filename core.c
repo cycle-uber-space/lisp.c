@@ -46,6 +46,63 @@ Expr s_lambda(Expr args, Expr kwargs, Expr env)
     return cons(intern("lit"), cons(intern("clo"), cons(env, cons(fun_args, fun_body))));
 }
 
+bool is_unquote(Expr exp)
+{
+    return is_named_call(exp, LISP_SYM_UNQUOTE);
+}
+
+bool is_unquote_splicing(Expr exp)
+{
+    return is_named_call(exp, LISP_SYM_UNQUOTE_SPLICING);
+}
+
+static Expr backquote(Expr exp, Expr env);
+
+static Expr backquote_list(Expr seq, Expr env)
+{
+    if (seq)
+    {
+        Expr item = car(seq);
+        Expr rest = cdr(seq);
+        if (is_unquote_splicing(item))
+        {
+            return append(eval(cadr(item), env), backquote_list(rest, env));
+        }
+        else
+        {
+            return cons(backquote(item, env), backquote_list(rest, env));
+        }
+    }
+    else
+    {
+        return nil;
+    }
+}
+
+static Expr backquote(Expr exp, Expr env)
+{
+    if (is_cons(exp))
+    {
+        if (is_unquote(exp))
+        {
+            return eval(cadr(exp), env);
+        }
+        else
+        {
+            return backquote_list(exp, env);
+        }
+    }
+    else
+    {
+        return exp;
+    }
+}
+
+Expr s_backquote(Expr args, Expr kwargs, Expr env)
+{
+    return backquote(car(args), env);
+}
+
 Expr s_syntax(Expr args, Expr kwargs, Expr env)
 {
     Expr const fun_args = car(args);
@@ -168,6 +225,7 @@ Expr make_core_env()
     env_defspecial(env, "def", s_def);
     env_defspecial(env, "lambda", s_lambda);
     env_defspecial(env, "syntax", s_syntax);
+    env_defspecial(env, "backquote", s_backquote);
 
     env_defun(env, "eq", f_eq);
     env_defun(env, "equal", f_eq);

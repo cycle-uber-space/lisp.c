@@ -144,6 +144,14 @@ inline static bool is_nil(Expr exp)
 
 /* symbol.h */
 
+#define LISP_SYMBOL_T intern("t")
+
+#define LISP_SYM_QUOTE intern("quote")
+#define LISP_SYM_IF intern("if")
+#define LISP_SYM_BACKQUOTE intern("backquote")
+#define LISP_SYM_UNQUOTE intern("unquote")
+#define LISP_SYM_UNQUOTE_SPLICING intern("unquote-splicing")
+
 #define LISP_MAX_SYMBOLS -1
 #define LISP_DEF_SYMBOLS 16
 
@@ -426,6 +434,8 @@ void render_expr(Expr exp, Expr out);
 /* util.h */
 
 char * get_temp_buf(size_t size);
+
+bool is_named_call(Expr exp, Expr name);
 
 inline static bool eq(Expr a, Expr b)
 {

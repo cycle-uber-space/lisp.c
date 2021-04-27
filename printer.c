@@ -1,11 +1,6 @@
 
 #include "lisp.h"
 
-static bool is_named_call(Expr exp, Expr name)
-{
-    return is_cons(exp) && eq(car(exp), name);
-}
-
 static bool is_quote_call(Expr exp)
 {
     return is_named_call(exp, intern("quote"));

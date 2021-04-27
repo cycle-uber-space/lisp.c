@@ -1,12 +1,6 @@
 
 #include "lisp.h"
 
-#define LISP_SYM_QUOTE intern("quote")
-#define LISP_SYM_IF intern("if")
-#define LISP_SYM_BACKQUOTE intern("backquote")
-#define LISP_SYM_UNQUOTE intern("unquote")
-#define LISP_SYM_UNQUOTE_SPLICING intern("unquote-splicing")
-
 bool is_op(Expr exp, Expr name)
 {
     return is_cons(exp) && car(exp) == name;
@@ -20,16 +14,6 @@ bool is_quote(Expr exp)
 bool is_if(Expr exp)
 {
     return is_op(exp, LISP_SYM_IF);
-}
-
-bool is_unquote(Expr exp)
-{
-    return is_op(exp, LISP_SYM_UNQUOTE);
-}
-
-bool is_unquote_splicing(Expr exp)
-{
-    return is_op(exp, LISP_SYM_UNQUOTE_SPLICING);
 }
 
 Expr eval(Expr exp, Expr env);
@@ -147,53 +131,6 @@ Expr apply(Expr name, Expr args, Expr env)
     }
 }
 
-static Expr backquote(Expr exp, Expr env);
-
-static Expr backquote_list(Expr seq, Expr env)
-{
-    if (seq)
-    {
-        Expr item = car(seq);
-        Expr rest = cdr(seq);
-        if (is_unquote_splicing(item))
-        {
-            return append(eval(cadr(item), env), backquote_list(rest, env));
-        }
-        else
-        {
-            return cons(backquote(item, env), backquote_list(rest, env));
-        }
-    }
-    else
-    {
-        return nil;
-    }
-}
-
-static Expr backquote(Expr exp, Expr env)
-{
-    if (is_cons(exp))
-    {
-        if (is_unquote(exp))
-        {
-            return eval(cadr(exp), env);
-        }
-        else
-        {
-            return backquote_list(exp, env);
-        }
-    }
-    else
-    {
-        return exp;
-    }
-}
-
-static Expr eval_backquote(Expr exp, Expr env)
-{
-    return backquote(cadr(exp), env);
-}
-
 Expr eval(Expr exp, Expr env)
 {
 dispatch:
@@ -242,11 +179,6 @@ dispatch:
         }
         else
 #endif
-        if (car(exp) == LISP_SYM_BACKQUOTE)
-        {
-            return eval_backquote(exp, env);
-        }
-        else
         {
             return apply(car(exp), cdr(exp), env);
         }
