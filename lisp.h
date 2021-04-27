@@ -124,6 +124,7 @@ enum
     TYPE_SYMBOL,
     TYPE_CONS,
     TYPE_STREAM,
+    TYPE_BUILTIN,
 };
 
 enum
@@ -285,6 +286,36 @@ inline static char stream_get_char(Expr exp)
 
 void stream_release(Expr exp);
 
+/* builtin.h */
+
+#define LISP_MAX_BUILTINS 64
+
+typedef Expr (* BuiltinFun)(Expr args, Expr kwargs, Expr env); // TODO should we pass the system state?
+
+typedef struct
+{
+    char const * name;
+    BuiltinFun fun;
+} BuiltinInfo;
+
+typedef struct
+{
+    U64 num;
+    BuiltinInfo info[LISP_MAX_BUILTINS];
+} BuiltinState;
+
+void builtin_init(BuiltinState * builtin);
+void builtin_quit(BuiltinState * builtin);
+
+bool is_builtin(Expr exp);
+
+Expr lisp_make_builtin(BuiltinState * builtin, char const * name, BuiltinFun fun);
+
+char const * lisp_builtin_name(BuiltinState * builtin, Expr exp);
+BuiltinFun lisp_builtin_fun(BuiltinState * builtin, Expr exp);
+
+Expr make_builtin(char const * name, BuiltinFun fun);
+
 /* reader.h */
 
 Expr read_one_from_string(char const * src);
@@ -343,6 +374,7 @@ typedef struct
     SymbolState symbol;
     ConsState cons;
     StreamState stream;
+    BuiltinState builtin;
 } SystemState;
 
 void system_init(SystemState * system);
@@ -354,5 +386,10 @@ extern SystemState global;
 
 void global_init();
 void global_quit();
+
+inline static BuiltinFun builtin_fun(Expr exp)
+{
+    return lisp_builtin_fun(&global.builtin, exp);
+}
 
 #endif /* _LISP_H_ */
