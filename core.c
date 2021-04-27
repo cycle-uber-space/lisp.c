@@ -155,7 +155,8 @@ Expr f_equal(Expr args, Expr kwargs, Expr env)
         }
         prv = exp;
     }
-    return intern("t");
+
+    return LISP_SYMBOL_T;
 }
 
 Expr f_cons(Expr args, Expr kwargs, Expr env)
