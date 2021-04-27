@@ -18,5 +18,5 @@ clean:
 lisp: $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-%.o: %.c lisp.h
+%.o: %.c lisp.h Makefile
 	$(CC) -c $(CFLAGS) -o $@ $<
