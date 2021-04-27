@@ -95,3 +95,8 @@ Expr nreverse(Expr list)
     }
     return prev;
 }
+
+Expr append(Expr a, Expr b)
+{
+    return a ? cons(car(a), append(cdr(a), b)) : b;
+}

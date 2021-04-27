@@ -207,6 +207,11 @@ static void unit_test_eval(TestState * test)
         LISP_TEST_ASSERT(test, !strcmp("(foo . bar)", eval_src("(cons 'foo 'bar)", env)));
         LISP_TEST_ASSERT(test, !strcmp("foo", eval_src("(car (cons 'foo 'bar))", env)));
         LISP_TEST_ASSERT(test, !strcmp("bar", eval_src("(cdr (cons 'foo 'bar))", env)));
+
+        LISP_TEST_ASSERT(test, !strcmp("foo", eval_src("`foo", env)));
+        LISP_TEST_ASSERT(test, !strcmp("foo", eval_src("`,'foo", env)));
+
+        LISP_TEST_ASSERT(test, !strcmp("(foo bar)", eval_src("`(,@'(foo bar))", env)));
     }
 }
 

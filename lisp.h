@@ -368,6 +368,7 @@ Expr first(Expr seq);
 Expr second(Expr seq);
 
 Expr nreverse(Expr seq);
+Expr append(Expr seq1, Expr seq2);
 
 /* env.h */
 
