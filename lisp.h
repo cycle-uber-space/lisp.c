@@ -124,6 +124,7 @@ enum
     TYPE_SYMBOL,
     TYPE_CONS,
     TYPE_GENSYM,
+    TYPE_STRING,
     TYPE_STREAM,
     TYPE_SPECIAL,
     TYPE_BUILTIN,
@@ -264,6 +265,25 @@ void gensym_quit(GensymState * gensym);
 bool is_gensym(Expr exp);
 
 Expr lisp_gensym(GensymState * gensym);
+
+/* string.h */
+
+#define LISP_MAX_STRINGS        500000
+
+typedef struct
+{
+    U64 count;
+    char ** values;
+} StringState;
+
+void string_init(StringState * string);
+void string_quit(StringState * string);
+
+bool is_string(Expr exp);
+
+Expr make_string(char const * str);
+char const * string_value(Expr exp);
+U64 string_length(Expr exp);
 
 /* stream.h */
 
@@ -454,6 +474,7 @@ typedef struct SystemState
     ConsState cons;
     StreamState stream;
     GensymState gensym;
+    StringState string;
     SpecialState special;
     BuiltinState builtin;
 } SystemState;
