@@ -36,6 +36,13 @@ Expr s_lambda(Expr args, Expr kwargs, Expr env)
     return cons(intern("lit"), cons(intern("clo"), cons(env, cons(fun_args, fun_body))));
 }
 
+Expr s_syntax(Expr args, Expr kwargs, Expr env)
+{
+    Expr const fun_args = car(args);
+    Expr const fun_body = cdr(args);
+    return cons(intern("lit"), cons(intern("mac"), cons(env, cons(fun_args, fun_body))));
+}
+
 Expr f_eq(Expr args, Expr kwargs, Expr env)
 {
     if (is_nil(args))
@@ -154,6 +161,7 @@ Expr make_core_env()
     env_defspecial(env, "if", s_if);
     env_defspecial(env, "def", s_def);
     env_defspecial(env, "lambda", s_lambda);
+    env_defspecial(env, "syntax", s_syntax);
 
     env_defun(env, "eq", f_eq);
     env_defun(env, "equal", f_eq);

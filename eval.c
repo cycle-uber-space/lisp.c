@@ -60,25 +60,35 @@ Expr eval_body(Expr exps, Expr env)
 
 /* (lit clo <env> <args> . <body>) */
 
-bool is_function(Expr exp)
+bool is_closure(Expr exp, Expr kind)
 {
     return is_cons(exp) &&
         eq(intern("lit"), car(exp)) &&
         is_cons(cdr(exp)) &&
-        eq(intern("clo"), cadr(exp));
+        eq(kind, cadr(exp));
 }
 
-Expr function_env(Expr exp)
+bool is_function(Expr exp)
+{
+    return is_closure(exp, intern("clo"));
+}
+
+bool is_macro(Expr exp)
+{
+    return is_closure(exp, intern("mac"));
+}
+
+Expr closure_env(Expr exp)
 {
     return caddr(exp);
 }
 
-Expr function_args(Expr exp)
+Expr closure_args(Expr exp)
 {
     return cadddr(exp);
 }
 
-Expr function_body(Expr exp)
+Expr closure_body(Expr exp)
 {
     return cddddr(exp);
 }
@@ -102,33 +112,38 @@ static Expr make_call_env_from(Expr lenv, Expr vars, Expr vals)
 
 Expr apply(Expr name, Expr args, Expr env)
 {
-    Expr func = eval(name, env);
-    if (is_builtin(func))
+    if (is_builtin(name))
     {
         // TODO parse keyword args
         Expr kwargs = nil;
         Expr vals = eval_list(args, env);
-        return builtin_fun(func)(vals, kwargs, env);
+        return builtin_fun(name)(vals, kwargs, env);
     }
-    else if (is_special(func))
+    else if (is_special(name))
     {
         // TODO parse keyword args
         Expr kwargs = nil;
         Expr vals = args;
-        return special_fun(func)(vals, kwargs, env);
+        return special_fun(name)(vals, kwargs, env);
     }
-    else if (is_function(func))
+    else if (is_function(name))
     {
         // TODO parse keyword args
         Expr kwargs = nil;
         Expr vals = eval_list(args, env);
-        Expr body = function_body(func);
-        return eval_body(body, make_call_env_from(function_env(func), function_args(func), vals));
+        Expr body = closure_body(name);
+        return eval_body(body, make_call_env_from(closure_env(name), closure_args(name), vals));
+    }
+    else if (is_macro(name))
+    {
+        Expr body = closure_body(name);
+        Expr exp = eval_body(body, make_call_env_from(closure_env(name), closure_args(name), args));
+        return eval(exp, env);
     }
     else
     {
-        LISP_FAIL("cannot apply %s to %s\n", repr(name), repr(args));
-        return nil;
+        // TODO check for unlimited recursion
+        return apply(eval(name, env), args, env);
     }
 }
 
