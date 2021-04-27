@@ -143,6 +143,7 @@ dispatch:
         }
         else
 #endif
+#if LISP_EVAL_IF
         if (car(exp) == intern("if"))
         {
             Expr const test = cadr(exp);
@@ -159,7 +160,9 @@ dispatch:
                 goto dispatch;
             }
         }
-        else if (car(exp) == LISP_SYM_BACKQUOTE)
+        else
+#endif
+        if (car(exp) == LISP_SYM_BACKQUOTE)
         {
             return eval_backquote(exp, env);
         }

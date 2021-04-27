@@ -99,6 +99,22 @@ Expr s_quote(Expr args, Expr kwargs, Expr env)
     return car(args);
 }
 
+Expr s_if(Expr args, Expr kwargs, Expr env)
+{
+    if (eval(car(args), env) != nil)
+    {
+        return eval(cadr(args), env);
+    }
+    else if (cddr(args))
+    {
+        return eval(caddr(args), env);
+    }
+    else
+    {
+        return nil;
+    }
+}
+
 static void env_defun(Expr env, char const * name, BuiltinFun fun)
 {
     env_def(env, intern(name), make_builtin(name, fun));
@@ -116,6 +132,7 @@ Expr make_core_env()
     env_def(env, intern("t"), intern("t"));
 
     env_defspecial(env, "quote", s_quote);
+    env_defspecial(env, "if", s_if);
 
     env_defun(env, "eq", f_eq);
     env_defun(env, "equal", f_eq);
