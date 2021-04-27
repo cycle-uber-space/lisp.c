@@ -19,6 +19,16 @@ static void fail(char const * fmt, ...)
     exit(1);
 }
 
+static Expr make_quote(Expr exp)
+{
+    return list_2(intern("quote"), exp);
+}
+
+static Expr make_backquote(Expr exp)
+{
+    return list_2(intern("backquote"), exp);
+}
+
 static void unit_test_expr(TestState * test)
 {
     LISP_TEST_GROUP(test, "expr");
@@ -66,11 +76,15 @@ static void unit_test_stream(TestState * test)
 
 static void unit_test_reader(TestState * test)
 {
+    Expr foo = intern("foo");
     LISP_TEST_GROUP(test, "reader");
     LISP_TEST_ASSERT(test, read_one_from_string("nil") == nil);
-    LISP_TEST_ASSERT(test, read_one_from_string("foo") == intern("foo"));
+    LISP_TEST_ASSERT(test, read_one_from_string("foo") == foo);
     LISP_TEST_ASSERT(test, read_one_from_string("()") == nil);
-    LISP_TEST_ASSERT(test, equal(read_one_from_string("(foo bar baz)"), list_3(intern("foo"), intern("bar"), intern("baz"))));
+    LISP_TEST_ASSERT(test, equal(read_one_from_string("(foo bar baz)"), list_3(foo, intern("bar"), intern("baz"))));
+
+    LISP_TEST_ASSERT(test, equal(read_one_from_string("'foo"), make_quote(foo)));
+    LISP_TEST_ASSERT(test, equal(read_one_from_string("`foo"), make_backquote(foo)));
 }
 
 static void unit_test_printer(TestState * test)
@@ -138,11 +152,6 @@ static void unit_test_env(TestState * test)
         LISP_TEST_ASSERT(test,  env_can_set(env2, foo));
         LISP_TEST_ASSERT(test, !env_can_set(env2, bar));
     }
-}
-
-static Expr make_quote(Expr exp)
-{
-    return list_2(intern("quote"), exp);
 }
 
 static char const * eval_src(char const * src, Expr env)
