@@ -1,6 +1,34 @@
 
 #include "lisp.h"
 
+Expr s_quote(Expr args, Expr kwargs, Expr env)
+{
+    return car(args);
+}
+
+Expr s_def(Expr args, Expr kwargs, Expr env)
+{
+    // TODO look for env in kwargs
+    env_def(env, car(args), eval(cadr(args), env));
+    return nil;
+}
+
+Expr s_if(Expr args, Expr kwargs, Expr env)
+{
+    if (eval(car(args), env) != nil)
+    {
+        return eval(cadr(args), env);
+    }
+    else if (cddr(args))
+    {
+        return eval(caddr(args), env);
+    }
+    else
+    {
+        return nil;
+    }
+}
+
 Expr f_eq(Expr args, Expr kwargs, Expr env)
 {
     if (is_nil(args))
@@ -97,34 +125,6 @@ Expr f_println(Expr args, Expr kwargs, Expr env)
 Expr f_gensym(Expr args, Expr kwargs, Expr env)
 {
     return lisp_gensym(&global.gensym);
-}
-
-Expr s_quote(Expr args, Expr kwargs, Expr env)
-{
-    return car(args);
-}
-
-Expr s_def(Expr args, Expr kwargs, Expr env)
-{
-    // TODO look for env in kwargs
-    env_def(env, car(args), eval(cadr(args), env));
-    return nil;
-}
-
-Expr s_if(Expr args, Expr kwargs, Expr env)
-{
-    if (eval(car(args), env) != nil)
-    {
-        return eval(cadr(args), env);
-    }
-    else if (cddr(args))
-    {
-        return eval(caddr(args), env);
-    }
-    else
-    {
-        return nil;
-    }
 }
 
 static void env_defun(Expr env, char const * name, BuiltinFun fun)
