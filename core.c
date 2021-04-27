@@ -94,6 +94,11 @@ Expr f_println(Expr args, Expr kwargs, Expr env)
     return nil;
 }
 
+Expr f_gensym(Expr args, Expr kwargs, Expr env)
+{
+    return lisp_gensym(&global.gensym);
+}
+
 Expr s_quote(Expr args, Expr kwargs, Expr env)
 {
     return car(args);
@@ -140,6 +145,8 @@ Expr make_core_env()
     env_defun(env, "car", f_car);
     env_defun(env, "cdr", f_cdr);
     env_defun(env, "println", f_println);
+
+    env_defun(env, "gensym", f_gensym);
 
     return env;
 }
