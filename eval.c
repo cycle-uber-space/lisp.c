@@ -1,6 +1,36 @@
 
 #include "lisp.h"
 
+Expr eval(Expr exp, Expr env);
+
+Expr eval_list(Expr exps, Expr env)
+{
+    Expr ret = nil;
+    for (Expr tmp = exps; tmp; tmp = cdr(tmp))
+    {
+        Expr const exp = car(tmp);
+        ret = cons(eval(exp, env), ret);
+    }
+    return ret;
+}
+
+Expr apply(Expr name, Expr args, Expr env)
+{
+    Expr func = eval(name, env);
+    if (is_builtin(func))
+    {
+        // TODO parse keyword args
+        Expr kwargs = nil;
+        Expr vals = eval_list(args, env);
+        return builtin_fun(func)(vals, kwargs, env);
+    }
+    else
+    {
+        LISP_FAIL("cannot apply %s to %s\n", repr(name), repr(args));
+        return nil;
+    }
+}
+
 Expr eval(Expr exp, Expr env)
 {
 dispatch:
@@ -40,6 +70,10 @@ dispatch:
                 exp = rest;
                 goto dispatch;
             }
+        }
+        else
+        {
+            return apply(car(exp), cdr(exp), env);
         }
     default:
         LISP_FAIL("cannot evaluate %s\n", repr(exp));
