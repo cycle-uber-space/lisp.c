@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 SystemState global;
 

@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 static Expr string_alloc(StringState * string, size_t len)
 {

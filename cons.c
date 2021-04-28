@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 static void _cons_realloc(ConsState * cons)
 {

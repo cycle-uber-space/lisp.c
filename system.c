@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 void system_init(SystemState * system)
 {

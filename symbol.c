@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 static void _symbol_maybe_realloc(SymbolState * symbol)
 {

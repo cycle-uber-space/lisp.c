@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 #define LISP_TEST_FILE stdout
 

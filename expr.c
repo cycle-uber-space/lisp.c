@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 Expr make_expr(U64 type, U64 data)
 {

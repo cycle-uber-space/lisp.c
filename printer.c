@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 static bool is_quote_call(Expr exp)
 {

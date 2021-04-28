@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 static void fail(char const * fmt, ...)
 {

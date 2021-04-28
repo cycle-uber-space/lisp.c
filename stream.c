@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 void stream_init(StreamState * stream)
 {

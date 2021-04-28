@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 static void env_defun(Expr env, char const * name, BuiltinFun fun)
 {

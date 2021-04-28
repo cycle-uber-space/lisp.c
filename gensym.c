@@ -1,5 +1,5 @@
 
-#include "lisp.h"
+#include "common.h"
 
 void gensym_init(GensymState * gensym)
 {
