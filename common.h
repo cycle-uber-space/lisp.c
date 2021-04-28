@@ -1,6 +1,6 @@
 
-#ifndef _LISP_H_
-#define _LISP_H_
+#ifndef _COMMON_H_
+#define _COMMON_H_
 
 #ifndef LISP_GLOBAL_API
 #define LISP_GLOBAL_API 1
@@ -535,4 +535,4 @@ inline static SpecialFun special_fun(Expr exp)
 
 #endif
 
-#endif /* _LISP_H_ */
+#endif /* _COMMON_H_ */
